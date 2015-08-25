@@ -11,7 +11,7 @@ Official elasticsearch plugin for dokku. Currently installs elasticsearch 1.7.1.
 
 ```
 cd /var/lib/dokku/plugins
-git clone https://github.com/dokku/dokku-elasticsearch-plugin.git elasticsearch
+git clone https://github.com/dokku/dokku-elasticsearch.git elasticsearch
 dokku plugins-install-dependencies
 dokku plugins-install
 ```
