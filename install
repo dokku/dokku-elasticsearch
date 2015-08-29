@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
-
-ELASTICSEARCH_IMAGE="elasticsearch"
-ELASTICSEARCH_IMAGE_VERSION=1.7.1
-ELASTICSEARCH_ROOT=/var/lib/dokku/services/elasticsearch
-
-PLUGIN_DATA_ROOT=$ELASTICSEARCH_ROOT
-PLUGIN_SERVICE="Elasticsearch"
-PLUGIN_IMAGE=$ELASTICSEARCH_IMAGE
-PLUGIN_IMAGE_VERSION=$ELASTICSEARCH_IMAGE_VERSION
+source "$(dirname "$0")/config"
 
 if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q $PLUGIN_IMAGE_VERSION ; then
   docker pull $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION
