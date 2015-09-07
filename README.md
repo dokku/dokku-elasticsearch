@@ -25,15 +25,16 @@ elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service
 elasticsearch:destroy <name>           Delete the service and stop its container if there are no links left
 elasticsearch:export <name>            NOT IMPLEMENTED
-elasticsearch:expose <name> <port>     NOT IMPLEMENTED
+elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
 elasticsearch:import <name> <file>     NOT IMPLEMENTED
 elasticsearch:info <name>              Print the connection information
 elasticsearch:link <name> <app>        Link the elasticsearch service to the app
 elasticsearch:list                     List all elasticsearch services
 elasticsearch:logs <name> [-t]         Print the most recent log(s) for this service
-elasticsearch:restart <name>           Graceful shutdown and restart of the service container
-elasticsearch:unexpose <name> <port>   NOT IMPLEMENTED
-elasticsearch:unlink <name> <app>      Unlink the elasticsearch service from the app
+elasticsearch:restart <name>           Graceful shutdown and restart of the elasticsearch service container
+elasticsearch:start <name>             Start a previously stopped elasticsearch service
+elasticsearch:stop <name>              Stop a running elasticsearch service
+elasticsearch:unexpose <name>          Unexpose a previously exposed elasticsearch service
 ```
 
 ## usage
@@ -65,7 +66,7 @@ dokku elasticsearch:link lolipop playground
 # the above will expose the following environment variables
 #
 #   DATABASE_URL=elasticsearch://elasticsearch:SOME_PASSWORD@172.17.0.1:9200
-#   DATABASE_NAME=/playground/DATABASE
+#   DATABASE_NAME=/lolipop/DATABASE
 #   DATABASE_PORT=tcp://172.17.0.1:9200
 #   DATABASE_PORT_9200_TCP=tcp://172.17.0.1:9200
 #   DATABASE_PORT_9200_TCP_PROTO=tcp
@@ -85,11 +86,10 @@ dokku elasticsearch:logs lolipop
 dokku elasticsearch:logs lolipop -t # to tail
 
 # finally, you can destroy the container
-dokku elasticsearch:destroy playground
+dokku elasticsearch:destroy lolipop
 ```
 
 ## todo
 
 - implement elasticsearch:clone
-- implement elasticsearch:expose
 - implement elasticsearch:import
