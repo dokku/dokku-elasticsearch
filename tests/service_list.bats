@@ -11,13 +11,13 @@ teardown() {
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with no exposed ports" {
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "l (running)"
+  assert_contains "${lines[*]}" "l, elasticsearch:1.7.1 (running)"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:list) with exposed ports" {
   dokku "$PLUGIN_COMMAND_PREFIX:expose" l 4242 4243
   run dokku "$PLUGIN_COMMAND_PREFIX:list"
-  assert_contains "${lines[*]}" "l (running), exposed port(s): 9200->4242 9300->4243"
+  assert_contains "${lines[*]}" "l, elasticsearch:1.7.1 (running), exposed port(s): 9200->4242 9300->4243"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:list) when there are no services" {
