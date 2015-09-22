@@ -9,11 +9,14 @@ Official elasticsearch plugin for dokku. Currently defaults to installing [elast
 
 ## installation
 
-```
+```shell
+# on 0.3.x
 cd /var/lib/dokku/plugins
 git clone https://github.com/dokku/dokku-elasticsearch.git elasticsearch
-dokku plugins-install-dependencies
 dokku plugins-install
+
+# on 0.4.x
+dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsearch
 ```
 
 ## commands
