@@ -22,7 +22,6 @@ dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsea
 ## commands
 
 ```
-elasticsearch:alias <name> <alias>     Set an alias for the docker link
 elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
 elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service
@@ -34,6 +33,7 @@ elasticsearch:info <name>              Print the connection information
 elasticsearch:link <name> <app>        Link the elasticsearch service to the app
 elasticsearch:list                     List all elasticsearch services
 elasticsearch:logs <name> [-t]         Print the most recent log(s) for this service
+elasticsearch:promote <name> <app>     Promote service <name> as ELASTICSEARCH_URL in <app>
 elasticsearch:restart <name>           Graceful shutdown and restart of the elasticsearch service container
 elasticsearch:start <name>             Start a previously stopped elasticsearch service
 elasticsearch:stop <name>              Stop a running elasticsearch service
@@ -57,8 +57,6 @@ dokku elasticsearch:create lolipop
 # get connection information as follows
 dokku elasticsearch:info lolipop
 
-# lets assume the ip of our elasticsearch service is 172.17.0.1
-
 # a elasticsearch service can be linked to a
 # container this will use native docker
 # links via the docker-options plugin
@@ -68,24 +66,42 @@ dokku elasticsearch:link lolipop playground
 
 # the above will expose the following environment variables
 #
-#   ELASTICSEARCH_URL=http://172.17.0.1:9200
-#   ELASTICSEARCH_NAME=/random_name/ELASTICSEARCH
-#   ELASTICSEARCH_PORT=tcp://172.17.0.1:9200
-#   ELASTICSEARCH_PORT_9200_TCP=tcp://172.17.0.1:9200
-#   ELASTICSEARCH_PORT_9200_TCP_PROTO=tcp
-#   ELASTICSEARCH_PORT_9200_TCP_PORT=9200
-#   ELASTICSEARCH_PORT_9200_TCP_ADDR=172.17.0.1
+#   DOKKU_ELASTICSEARCH_LOLIPOP_NAME=/random_name/ELASTICSEARCH
+#   DOKKU_ELASTICSEARCH_LOLIPOP_PORT=tcp://172.17.0.1:9200
+#   DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP=tcp://172.17.0.1:9200
+#   DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP_PROTO=tcp
+#   DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP_PORT=9200
+#   DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP_ADDR=172.17.0.1
+#
+# and the following will be set on the linked application by default
+#
+#   ELASTICSEARCH_URL=http://dokku-elasticsearch-lolipop:9200
+#
+# NOTE: the host exposed here only works internally in docker containers. If
+# you want your container to be reachable from outside, you should use `expose`.
 
-# you can examine the environment variables
-# using our 'playground' app's env command
-dokku run playground env
+# another service can be linked to your app
+dokku elasticsearch:link other_service playground
 
-# you can customize the prefix of environment
-# variables through a custom docker link alias
-dokku elasticsearch:alias lolipop DATABASE
+# since ELASTICSEARCH_URL is already in use, another environment variable will be
+# generated automatically
+#
+#   DOKKU_ELASTICSEARCH_BLUE_URL=http://dokku-elasticsearch-other-service:9200
 
-# you can also unlink a elasticsearch service
+# you can then promote the new service to be the primary one
 # NOTE: this will restart your app
+dokku elasticsearch:promote other_service playground
+
+# this will replace ELASTICSEARCH_URL with the url from other_service and generate
+# another environment variable to hold the previous value if necessary.
+# you could end up with the following for example:
+#
+#   ELASTICSEARCH_URL=http://dokku-elasticsearch-other-service:9200
+#   DOKKU_ELASTICSEARCH_BLUE_URL=http://dokku-elasticsearch-other-service:9200
+#   DOKKU_ELASTICSEARCH_SILVER_URL=http://dokku-elasticsearch-lolipop:9200
+
+# you can also unlink an elasticsearch service
+# NOTE: this will restart your app and unset related environment variables
 dokku elasticsearch:unlink lolipop playground
 
 # you can tail logs for a particular service
