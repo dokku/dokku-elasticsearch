@@ -68,17 +68,17 @@ dokku elasticsearch:link lolipop playground
 
 # the above will expose the following environment variables
 #
-#   DATABASE_URL=elasticsearch://elasticsearch:SOME_PASSWORD@172.17.0.1:9200
-#   DATABASE_NAME=/lolipop/DATABASE
-#   DATABASE_PORT=tcp://172.17.0.1:9200
-#   DATABASE_PORT_9200_TCP=tcp://172.17.0.1:9200
-#   DATABASE_PORT_9200_TCP_PROTO=tcp
-#   DATABASE_PORT_9200_TCP_PORT=9200
-#   DATABASE_PORT_9200_TCP_ADDR=172.17.0.1
+#   ELASTICSEARCH_URL=http://172.17.0.1:9200
+#   ELASTICSEARCH_NAME=/random_name/ELASTICSEARCH
+#   ELASTICSEARCH_PORT=tcp://172.17.0.1:9200
+#   ELASTICSEARCH_PORT_9200_TCP=tcp://172.17.0.1:9200
+#   ELASTICSEARCH_PORT_9200_TCP_PROTO=tcp
+#   ELASTICSEARCH_PORT_9200_TCP_PORT=9200
+#   ELASTICSEARCH_PORT_9200_TCP_ADDR=172.17.0.1
 
-# you can customize the environment
+# you can customize the prefix of environment
 # variables through a custom docker link alias
-dokku elasticsearch:alias lolipop ELASTICSEARCH_DATABASE
+dokku elasticsearch:alias lolipop DATABASE
 
 # you can also unlink a elasticsearch service
 # NOTE: this will restart your app
