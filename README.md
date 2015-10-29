@@ -26,7 +26,7 @@ elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
 elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service
 elasticsearch:destroy <name>           Delete the service and stop its container if there are no links left
-elasticsearch:export <name>            NOT IMPLEMENTED
+elasticsearch:export <name> > <file>   NOT IMPLEMENTED
 elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
 elasticsearch:import <name> <file>     NOT IMPLEMENTED
 elasticsearch:info <name>              Print the connection information
