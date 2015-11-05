@@ -24,7 +24,7 @@ dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsea
 ```
 elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
 elasticsearch:connect <name>           NOT IMPLEMENTED
-elasticsearch:create <name>            Create a elasticsearch service
+elasticsearch:create <name>            Create a elasticsearch service with environment variables
 elasticsearch:destroy <name>           Delete the service and stop its container if there are no links left
 elasticsearch:export <name>            NOT IMPLEMENTED
 elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
@@ -52,6 +52,13 @@ dokku elasticsearch:create lolipop
 # official elasticsearch image
 export ELASTICSEARCH_IMAGE="elasticsearch"
 export ELASTICSEARCH_IMAGE_VERSION="1.6.2"
+
+# you can also specify custom environment
+# variables to start the elasticsearch service
+# in semi-colon separated forma
+export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
+
+# create a elasticsearch service
 dokku elasticsearch:create lolipop
 
 # get connection information as follows
