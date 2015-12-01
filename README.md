@@ -38,6 +38,7 @@ elasticsearch:restart <name>           Graceful shutdown and restart of the elas
 elasticsearch:start <name>             Start a previously stopped elasticsearch service
 elasticsearch:stop <name>              Stop a running elasticsearch service
 elasticsearch:unexpose <name>          Unexpose a previously exposed elasticsearch service
+elasticsearch:unlink <name> <app>      Unlink the elasticsearch service from the app
 ```
 
 ## usage
