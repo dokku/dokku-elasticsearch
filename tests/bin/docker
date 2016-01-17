@@ -30,7 +30,7 @@ case "$1" in
       exit 0
     else
       echo "CONTAINER ID        IMAGE                      COMMAND                CREATED             STATUS                         PORTS               NAMES"
-      echo "4eeaae231d5e        elasticsearch:1.7.1        \"/docker-entrypoint.   11 seconds ago       Up 10 seconds       9200/tcp, 9300/tcp               dokku.elasticsearch.l"
+      echo "4eeaae231d5e        elasticsearch:2.1.1        \"/docker-entrypoint.   11 seconds ago       Up 10 seconds       9200/tcp, 9300/tcp               dokku.elasticsearch.l"
       echo "ef27fec191ba        memcached:1.4.24           \"/entrypoint.sh memc   11 seconds ago       Up 10 seconds       11211/tcp                        dokku.memcached.l"
       echo "94df08fe5550        mariadb:10.0.21            \"/docker-entrypoint.   11 seconds ago       Up 10 seconds       3306/tcp                         dokku.mariadb.l"
       echo "ef27fec191ba        memcached:1.4.24           \"/entrypoint.sh memc   11 seconds ago       Up 10 seconds       11211/tcp                        dokku.memcached.l"
@@ -70,7 +70,7 @@ case "$1" in
     ;;
   images)
     echo "REPOSITORY                TAG                 IMAGE ID            CREATED             VIRTUAL SIZE"
-    echo "elasticsearch             1.7.1               89ed89918502        9 days ago          522.1 MB"
+    echo "elasticsearch             2.1.1               89ed89918502        9 days ago          522.1 MB"
     echo "mariadb                   10.0.21             f2485761e714        11 days ago         302.2 MB"
     echo "memcached                 1.4.24              8a05b51f8876        13 days ago         132.4 MB"
     echo "mongo                     3.1.6               7e67358fb571        13 days ago         291.1 MB"
