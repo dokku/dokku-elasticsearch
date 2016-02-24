@@ -121,7 +121,7 @@ case "$1" in
         install_plugin_with_url "$SERVICE" "$@"
         ;;
       *)
-        install_plugin
+        install_plugin "$SERVICE" "$3"
         ;;
     esac
     ;;
@@ -131,7 +131,7 @@ case "$1" in
     [[ -z $3 ]] && dokku_log_fail "Please specify a plugin name"
     verify_service_name "$2"
     SERVICE="$2"
-    uninstall_plugin
+    uninstall_plugin "$SERVICE" "$3"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:export)
@@ -230,8 +230,9 @@ case "$1" in
     $PLUGIN_COMMAND_PREFIX:unlink <name> <app>, Unlink the $PLUGIN_SERVICE service from the app
     $PLUGIN_COMMAND_PREFIX:export <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:import <name> <file>, NOT IMPLEMENTED
-    $PLUGIN_COMMAND_PREFIX:install <name> [--url], Install $PLUGIN_SERVICE plugin
-    $PLUGIN_COMMAND_PREFIX:uninstall <name>, Uninstall $PLUGIN_SERVICE plugin
+    $PLUGIN_COMMAND_PREFIX:plugin:install <name> [--url], Install $PLUGIN_SERVICE plugin
+    $PLUGIN_COMMAND_PREFIX:plugin:uninstall <name>, Uninstall $PLUGIN_SERVICE plugin
+    $PLUGIN_COMMAND_PREFIX:plugin:list <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:connect <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:logs <name> [-t], Print the most recent log(s) for this service
     $PLUGIN_COMMAND_PREFIX:restart <name>, Graceful shutdown and restart of the $PLUGIN_SERVICE service container
