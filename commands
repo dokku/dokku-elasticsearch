@@ -110,13 +110,13 @@ case "$1" in
     ;;
 
   $PLUGIN_COMMAND_PREFIX:plugin:install)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    [[ -z $3 ]] && dokku_log_fail "Please specify a plugin name"
+    [[ -z $2 ]] && dokku_log_fail "Please specify the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify the plugin name"
     verify_service_name "$2"
     SERVICE="$2"
     case "$3" in
       https:*|http:*)
-        [[ "$#" -lt 2 ]] && dokku_log_fail "Please specify both URL and the name of the plugin"
+        [[ "$#" != 4 ]] && dokku_log_fail "Please specify both URL and the name of the plugin"
         shift
         install_plugin_with_url "$@"
         ;;
@@ -127,8 +127,8 @@ case "$1" in
     ;;
 
   $PLUGIN_COMMAND_PREFIX:plugin:uninstall)
-    [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
-    [[ -z $3 ]] && dokku_log_fail "Please specify a plugin name"
+    [[ -z $2 ]] && dokku_log_fail "Please specify the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify the plugin name"
     verify_service_name "$2"
     SERVICE="$2"
     uninstall_plugin "$SERVICE" "$3"
