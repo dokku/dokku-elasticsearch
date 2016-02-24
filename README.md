@@ -22,23 +22,26 @@ dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsea
 ## commands
 
 ```
-elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
-elasticsearch:connect <name>           NOT IMPLEMENTED
-elasticsearch:create <name>            Create a elasticsearch service with environment variables
-elasticsearch:destroy <name>           Delete the service and stop its container if there are no links left
-elasticsearch:export <name> > <file>   NOT IMPLEMENTED
-elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
-elasticsearch:import <name> <file>     NOT IMPLEMENTED
-elasticsearch:info <name>              Print the connection information
-elasticsearch:link <name> <app>        Link the elasticsearch service to the app
-elasticsearch:list                     List all elasticsearch services
-elasticsearch:logs <name> [-t]         Print the most recent log(s) for this service
-elasticsearch:promote <name> <app>     Promote service <name> as ELASTICSEARCH_URL in <app>
-elasticsearch:restart <name>           Graceful shutdown and restart of the elasticsearch service container
-elasticsearch:start <name>             Start a previously stopped elasticsearch service
-elasticsearch:stop <name>              Stop a running elasticsearch service
-elasticsearch:unexpose <name>          Unexpose a previously exposed elasticsearch service
-elasticsearch:unlink <name> <app>      Unlink the elasticsearch service from the app
+elasticsearch:clone <name> <new-name>               NOT IMPLEMENTED
+elasticsearch:connect <name>                        NOT IMPLEMENTED
+elasticsearch:create <name>                         Create a elasticsearch service with environment variables
+elasticsearch:destroy <name>                        Delete the service and stop its container if there are no links left
+elasticsearch:export <name> > <file>                NOT IMPLEMENTED
+elasticsearch:expose <name> [port]                  Expose a elasticsearch service on custom port if provided (random port otherwise)
+elasticsearch:import <name> <file>                  NOT IMPLEMENTED
+elasticsearch:info <name>                           Print the connection information
+elasticsearch:link <name> <app>                     Link the elasticsearch service to the app
+elasticsearch:list                                  List all elasticsearch services
+elasticsearch:logs <name> [-t]                      Print the most recent log(s) for this service
+elasticsearch:plugin:install <name> [url] <plugin>  Install $PLUGIN_SERVICE plugin
+elasticsearch:plugin:uninstall <name> <plugin>      Uninstall $PLUGIN_SERVICE plugin
+elasticsearch:plugin:list <name>                    NOT IMPLEMENTED
+elasticsearch:promote <name> <app>                  Promote service <name> as ELASTICSEARCH_URL in <app>
+elasticsearch:restart <name>                        Graceful shutdown and restart of the elasticsearch service container
+elasticsearch:start <name>                          Start a previously stopped elasticsearch service
+elasticsearch:stop <name>                           Stop a running elasticsearch service
+elasticsearch:unexpose <name>                       Unexpose a previously exposed elasticsearch service
+elasticsearch:unlink <name> <app>                   Unlink the elasticsearch service from the app
 ```
 
 ## usage
@@ -91,6 +94,14 @@ dokku elasticsearch:link lolipop playground
 
 # another service can be linked to your app
 dokku elasticsearch:link other_service playground
+
+# you could install elasticsearch plugins
+dokku elasticsearch:plugin:install lolipop delete-by-query
+# to install plugins from a URL use
+dokku elasticsearch:plugin:install lolipop https://github.com/your/favourite-plugin.jar favourite-plugin
+
+# as expected, you could also uninstall them
+dokku elasticsearch:plugin:uninstall lolipop delete-by-query
 
 # since ELASTICSEARCH_URL is already in use, another environment variable will be
 # generated automatically
