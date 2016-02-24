@@ -44,12 +44,12 @@ teardown() {
   assert_contains "${lines[*]}" "Please specify both URL and the name of the plugin"
 }
 
-@test "($PLUGIN_COMMAND_PREFIX:plugin:install) installs a plugin" {
+@test "($PLUGIN_COMMAND_PREFIX:plugin:install) success" {
   run dokku "$PLUGIN_COMMAND_PREFIX:plugin:install" l test_plugin
   assert_contains "${lines[*]}" "Installing test_plugin..."
 }
 
-@test "($PLUGIN_COMMAND_PREFIX:plugin:install) installs a plugin with url" {
+@test "($PLUGIN_COMMAND_PREFIX:plugin:install) success with url" {
   run dokku "$PLUGIN_COMMAND_PREFIX:plugin:install" l http://dokku.me test_plugin
   assert_contains "${lines[*]}" "Installing plugin repo"
 }
