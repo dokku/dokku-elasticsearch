@@ -4,7 +4,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/test_helper.bash"
 BIN_STUBS="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bin"
 
 if [[ ! -d $DOKKU_ROOT ]]; then
-  git clone https://github.com/progrium/dokku.git $DOKKU_ROOT > /dev/null
+  git clone https://github.com/cu12/dokku.git $DOKKU_ROOT > /dev/null
 fi
 
 cd $DOKKU_ROOT

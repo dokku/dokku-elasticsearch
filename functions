@@ -23,6 +23,34 @@ get_container_ip() {
   docker inspect --format '{{ .NetworkSettings.IPAddress }}' "$1"
 }
 
+install_plugin_with_url() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  local ID=$(cat "$SERVICE_ROOT/ID")
+  local PLUGIN_GIT_URL="$2"
+  local PLUGIN_NAME="$3"
+  dokku_log_info1_quiet "Installing plugin repo $PLUGIN_GIT_URL to Elasticsearch as $PLUGIN_NAME"
+  docker exec -t "$ID" /usr/share/elasticsearch/bin/plugin --url "$PLUGIN_GIT_URL" --install "$PLUGIN_NAME"
+}
+
+install_plugin() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  local ID=$(cat "$SERVICE_ROOT/ID")
+  local PLUGIN_NAME="$2"
+  dokku_log_info1_quiet "Installing plugin to Elasticsearch as $PLUGIN_NAME"
+  docker exec -t "$ID" /usr/share/elasticsearch/bin/plugin -i "$PLUGIN_NAME"
+}
+
+uninstall_plugin() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  local ID=$(cat "$SERVICE_ROOT/ID")
+  local PLUGIN_NAME="$2"
+  dokku_log_info1_quiet "Uninstalling Elasticsearch plugin $PLUGIN_NAME"
+  docker exec -t "$ID" /usr/share/elasticsearch/bin/plugin -r "$PLUGIN_NAME"
+}
+
 verify_service_name() {
   local SERVICE="$1"
   [[ ! -n "$SERVICE" ]] && dokku_log_fail "(verify_service_name) SERVICE must not be null"
