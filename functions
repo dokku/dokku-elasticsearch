@@ -39,7 +39,7 @@ install_plugin() {
   local ID=$(cat "$SERVICE_ROOT/ID")
   local PLUGIN_NAME="$2"
   dokku_log_info1_quiet "Installing plugin to Elasticsearch as $PLUGIN_NAME"
-  docker exec -t "$ID" "plugin -i $PLUGIN_NAME"
+  docker exec -t "$ID" "/usr/share/elasticsearch/bin/plugin -i $PLUGIN_NAME"
 }
 
 uninstall_plugin() {
@@ -48,7 +48,7 @@ uninstall_plugin() {
   local ID=$(cat "$SERVICE_ROOT/ID")
   local PLUGIN_NAME="$2"
   dokku_log_info1_quiet "Uninstalling Elasticsearch plugin $PLUGIN_NAME"
-  docker exec -t "$ID" "plugin -r $PLUGIN_NAME"
+  docker exec -t "$ID" "/usr/share/elasticsearch/bin/plugin -r $PLUGIN_NAME"
 }
 
 verify_service_name() {
