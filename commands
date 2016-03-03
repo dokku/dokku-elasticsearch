@@ -25,6 +25,11 @@ case "$1" in
     [[ ! -d "$PLUGIN_DATA_ROOT/$2" ]] || dokku_log_fail "$PLUGIN_SERVICE service $2 already exists"
     SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
 
+    if [[ -n $3 ]]; then
+      PLUGIN_IMAGE=$(echo $3 | sed -e 's/:.*//')
+      PLUGIN_IMAGE_VERSION=$(echo $3 | sed -e 's/.*://')
+    fi
+
     if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q " $PLUGIN_IMAGE_VERSION " ; then
       dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION not found"
     fi
@@ -59,7 +64,13 @@ case "$1" in
 
     [[ -s "$LINKS_FILE" ]] && dokku_log_fail "Cannot delete linked service"
 
-    [[ "$3" == "force" ]] && DOKKU_APPS_FORCE_DELETE=1
+    [[ "$3" == "force" ]] || [[ "$4" == "force" ]] && DOKKU_APPS_FORCE_DELETE=1
+
+    if [[ -n $3 ]]; then
+      PLUGIN_IMAGE=$(echo $3 | sed -e 's/:.*//')
+      PLUGIN_IMAGE_VERSION=$(echo $3 | sed -e 's/.*://')
+    fi
+
     if [[ -z "$DOKKU_APPS_FORCE_DELETE" ]]; then
       dokku_log_warn "WARNING: Potentially Destructive Action"
       dokku_log_warn "This command will destroy $SERVICE $PLUGIN_SERVICE service."
@@ -199,8 +210,8 @@ case "$1" in
 
   help | $PLUGIN_COMMAND_PREFIX:help)
     HELP=$(cat<<EOF
-    $PLUGIN_COMMAND_PREFIX:create <name>, Create a $PLUGIN_SERVICE service
-    $PLUGIN_COMMAND_PREFIX:destroy <name>, Delete the $PLUGIN_SERVICE service and stop its container if there are no links left
+    $PLUGIN_COMMAND_PREFIX:create <name> [<image:version>], Create a $PLUGIN_SERVICE service
+    $PLUGIN_COMMAND_PREFIX:destroy <name> [<image:version>], Delete the $PLUGIN_SERVICE service and stop its container if there are no links left
     $PLUGIN_COMMAND_PREFIX:link <name> <app>, Link the $PLUGIN_SERVICE service to the app
     $PLUGIN_COMMAND_PREFIX:unlink <name> <app>, Unlink the $PLUGIN_SERVICE service from the app
     $PLUGIN_COMMAND_PREFIX:export <name>, NOT IMPLEMENTED
