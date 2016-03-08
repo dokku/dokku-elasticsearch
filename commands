@@ -63,17 +63,8 @@ case "$1" in
     SERVICE_NAME=$(get_service_name "$SERVICE")
 
     [[ -s "$LINKS_FILE" ]] && dokku_log_fail "Cannot delete linked service"
-
-    if [[ -n $3 ]]; then
-      if [[ "$3" == "force" ]]; then
-        DOKKU_APPS_FORCE_DELETE=1
-      else
-        PLUGIN_IMAGE=$(echo $3 | sed -e 's/:.*//')
-        PLUGIN_IMAGE_VERSION=$(echo $3 | sed -e 's/.*://')
-      fi
-    fi
     
-    if [[ "$4" == "force" ]]; then
+    if [[ "$3" == "force" ]]; then
       DOKKU_APPS_FORCE_DELETE=1
     fi
 
@@ -217,7 +208,7 @@ case "$1" in
   help | $PLUGIN_COMMAND_PREFIX:help)
     HELP=$(cat<<EOF
     $PLUGIN_COMMAND_PREFIX:create <name> [<image:version>], Create a $PLUGIN_SERVICE service
-    $PLUGIN_COMMAND_PREFIX:destroy <name> [<image:version>], Delete the $PLUGIN_SERVICE service and stop its container if there are no links left
+    $PLUGIN_COMMAND_PREFIX:destroy <name>, Delete the $PLUGIN_SERVICE service and stop its container if there are no links left
     $PLUGIN_COMMAND_PREFIX:link <name> <app>, Link the $PLUGIN_SERVICE service to the app
     $PLUGIN_COMMAND_PREFIX:unlink <name> <app>, Unlink the $PLUGIN_SERVICE service from the app
     $PLUGIN_COMMAND_PREFIX:export <name>, NOT IMPLEMENTED
