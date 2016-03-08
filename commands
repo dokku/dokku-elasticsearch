@@ -64,7 +64,7 @@ case "$1" in
 
     [[ -s "$LINKS_FILE" ]] && dokku_log_fail "Cannot delete linked service"
 
-    if [[ -n $3 ]]; then
+    if [[ -n $3 ]] && [[ "$3" != "force" ]]; then
       PLUGIN_IMAGE=$(echo $3 | sed -e 's/:.*//')
       PLUGIN_IMAGE_VERSION=$(echo $3 | sed -e 's/.*://')
     fi
