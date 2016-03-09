@@ -50,7 +50,7 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:plugin:install) success with url" {
-  run dokku "$PLUGIN_COMMAND_PREFIX:plugin:install" l https://raw.githubusercontent.com/cu12/dokku-elasticsearch/master/tests/artifacts/elasticsearch-native-script-example-1.7.1-SNAPSHOT.zip test_plugin
+  run dokku "$PLUGIN_COMMAND_PREFIX:plugin:install" l https://raw.githubusercontent.com/cu12/dokku-elasticsearch/master/tests/artifacts/elasticsearch-plugin-dokku-test.zip test_plugin
   assert_success
 }
 
