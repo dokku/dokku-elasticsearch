@@ -109,6 +109,31 @@ case "$1" in
     service_unlink "$2" "$3"
     ;;
 
+  $PLUGIN_COMMAND_PREFIX:plugin:install)
+    [[ -z $2 ]] && dokku_log_fail "Please specify the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify the plugin name"
+    verify_service_name "$2"
+    SERVICE="$2"
+    case "$3" in
+      https:*|http:*)
+        [[ "$#" != 4 ]] && dokku_log_fail "Please specify both URL and the name of the plugin"
+        shift
+        install_plugin_with_url "$@"
+        ;;
+      *)
+        install_plugin "$SERVICE" "$3"
+        ;;
+    esac
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:plugin:uninstall)
+    [[ -z $2 ]] && dokku_log_fail "Please specify the service"
+    [[ -z $3 ]] && dokku_log_fail "Please specify the plugin name"
+    verify_service_name "$2"
+    SERVICE="$2"
+    uninstall_plugin "$SERVICE" "$3"
+    ;;
+
   $PLUGIN_COMMAND_PREFIX:export)
     [[ -z $2 ]] && dokku_log_fail "Please specify a name for the service"
     verify_service_name "$2"
@@ -205,6 +230,9 @@ case "$1" in
     $PLUGIN_COMMAND_PREFIX:unlink <name> <app>, Unlink the $PLUGIN_SERVICE service from the app
     $PLUGIN_COMMAND_PREFIX:export <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:import <name> <file>, NOT IMPLEMENTED
+    $PLUGIN_COMMAND_PREFIX:plugin:install <name> [url] <plugin>, Install $PLUGIN_SERVICE plugin
+    $PLUGIN_COMMAND_PREFIX:plugin:uninstall <name> <plugin>, Uninstall $PLUGIN_SERVICE plugin
+    $PLUGIN_COMMAND_PREFIX:plugin:list <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:connect <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:logs <name> [-t], Print the most recent log(s) for this service
     $PLUGIN_COMMAND_PREFIX:restart <name>, Graceful shutdown and restart of the $PLUGIN_SERVICE service container
