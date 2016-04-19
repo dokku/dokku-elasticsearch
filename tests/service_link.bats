@@ -58,3 +58,11 @@ teardown() {
   assert_contains "${lines[*]}" "--link dokku.elasticsearch.l:dokku-elasticsearch-l"
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
+
+@test "($PLUGIN_COMMAND_PREFIX:link) uses apps ELASTICSEARCH_DATABASE_SCHEME variable" {
+  dokku config:set my_app ELASTICSEARCH_DATABASE_SCHEME=elasticsearch2
+  dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
+  url=$(dokku config:get my_app ELASTICSEARCH_URL)
+  assert_contains "$url" "elasticsearch2://dokku-elasticsearch-l:9200"
+  dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
+}
