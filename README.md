@@ -121,6 +121,33 @@ dokku elasticsearch:logs lolipop -t # to tail
 dokku elasticsearch:destroy lolipop
 ```
 
+## Changing database adapter
+
+It's possible to change the protocol for ELASTICSEARCH_URL by setting
+the environment variable ELASTICSEARCH_DATABASE_SCHEME on the app:
+
+```
+dokku config:set playground ELASTICSEARCH_DATABASE_SCHEME=elasticsearch2
+dokku elasticsearch:link lolipop playground
+```
+
+Will cause ELASTICSEARCH_URL to be set as
+elasticsearch2://dokku-elasticsearch-lolipop:9200
+
+CAUTION: Changing ELASTICSEARCH_DATABASE_SCHEME after linking will cause dokku to
+believe the elasticsearch is not linked when attempting to use `dokku elasticsearch:unlink`
+or `dokku elasticsearch:promote`.
+You should be able to fix this by
+
+- Changing ELASTICSEARCH_URL manually to the new value.
+
+OR
+
+- Set ELASTICSEARCH_DATABASE_SCHEME back to its original setting
+- Unlink the service
+- Change ELASTICSEARCH_DATABASE_SCHEME to the desired setting
+- Relink the service
+
 ## todo
 
 - implement elasticsearch:clone

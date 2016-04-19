@@ -51,3 +51,9 @@ teardown() {
   run dokku config my_app
   assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_"
 }
+@test "($PLUGIN_COMMAND_PREFIX:promote) uses ELASTICSEARCH_DATABASE_SCHEME variable" {
+  dokku config:set my_app "ELASTICSEARCH_DATABASE_SCHEME=elasticsearch2" "ELASTICSEARCH_URL=http://host:9200" "DOKKU_ELASTICSEARCH_BLUE_URL=elasticsearch2://dokku-elasticsearch-l:9200"
+  dokku "$PLUGIN_COMMAND_PREFIX:promote" l my_app
+  url=$(dokku config:get my_app ELASTICSEARCH_URL)
+  assert_contains "$url" "elasticsearch2://dokku-elasticsearch-l:9200"
+}
