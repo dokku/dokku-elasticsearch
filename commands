@@ -34,21 +34,12 @@ case "$1" in
     mkdir -p "$SERVICE_ROOT/config" || dokku_log_fail "Unable to create service config directory"
     touch "$LINKS_FILE"
 
-    dokku_log_info1 "Starting container"
     if [[ -n $ELASTICSEARCH_CUSTOM_ENV ]]; then
       echo "$ELASTICSEARCH_CUSTOM_ENV" | tr ';' "\n" > "$SERVICE_ROOT/ENV"
     else
       echo "" > "$SERVICE_ROOT/ENV"
     fi
-    SERVICE_NAME=$(get_service_name "$SERVICE")
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_ROOT/config:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-    echo "$ID" > "$SERVICE_ROOT/ID"
-
-    dokku_log_verbose_quiet "Waiting for container to be ready"
-    docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
-
-    dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
-    dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
+    service_create_container "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:destroy)
