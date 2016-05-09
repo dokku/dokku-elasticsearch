@@ -2,6 +2,7 @@
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_AVAILABLE_PATH/config/functions"
+source "$PLUGIN_AVAILABLE_PATH/docker-options/functions"
 
 get_random_ports() {
   local iterations="${1:-1}"
@@ -35,6 +36,20 @@ service_alias() {
   local SERVICE="$1"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
   echo "$SERVICE_NAME" | tr ._ -
+}
+
+service_export() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+
+  dokku_log_fail "Not yet implemented"
+}
+
+service_import() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+
+  dokku_log_fail "Not yet implemented"
 }
 
 service_info() {
@@ -91,7 +106,10 @@ service_link() {
   if [[ -n $DEFAULT_ALIAS ]]; then
     ALIAS=$(service_alternative_alias "$EXISTING_CONFIG")
   fi
-  dokku docker-options:add "$APP" build,deploy,run "--link $SERVICE_NAME:$SERVICE_ALIAS"
+
+  # shellcheck disable=SC2034
+  local passed_phases=(build deploy run)
+  add_passed_docker_option passed_phases[@] "--link $SERVICE_NAME:$SERVICE_ALIAS"
   config_set "$APP" "${ALIAS}_URL=$SERVICE_URL"
 }
 
@@ -247,6 +265,29 @@ service_start() {
   fi
 }
 
+service_create() {
+  local SERVICE="$1"
+  [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+  [[ ! -d "$PLUGIN_DATA_ROOT/$SERVICE" ]] || dokku_log_fail "$PLUGIN_SERVICE service $SERVICE already exists"
+  SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
+
+  if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q " $PLUGIN_IMAGE_VERSION " ; then
+    docker pull "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" || dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION pull failed"
+  fi
+
+  mkdir -p "$SERVICE_ROOT" || dokku_log_fail "Unable to create service directory"
+  mkdir -p "$SERVICE_ROOT/data" || dokku_log_fail "Unable to create service data directory"
+  mkdir -p "$SERVICE_ROOT/config" || dokku_log_fail "Unable to create service config directory"
+  touch "$LINKS_FILE"
+
+  if [[ -n $ELASTICSEARCH_CUSTOM_ENV ]]; then
+    echo "$ELASTICSEARCH_CUSTOM_ENV" | tr ';' "\n" > "$SERVICE_ROOT/ENV"
+  else
+    echo "" > "$SERVICE_ROOT/ENV"
+  fi
+  service_create_container "$SERVICE"
+}
+
 service_create_container() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
@@ -259,7 +300,7 @@ service_create_container() {
   docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
-  dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
+  service_info "$SERVICE"
 }
 
 service_stop() {
@@ -292,7 +333,9 @@ service_unlink() {
   [[ -z ${LINK[*]} ]] && dokku_log_fail "Not linked to app $APP"
   remove_from_links_file "$SERVICE" "$APP"
 
-  dokku docker-options:remove "$APP" build,deploy,run "--link $SERVICE_NAME:$SERVICE_ALIAS"
+  # shellcheck disable=SC2034
+  local passed_phases=(build deploy run)
+  remove_passed_docker_option passed_phases[@] "--link $SERVICE_NAME:$SERVICE_ALIAS"
   config_unset "$APP" "${LINK[*]}"
 }
 
