@@ -48,17 +48,25 @@ dokku elasticsearch:create lolipop
 # official elasticsearch image
 export ELASTICSEARCH_IMAGE="elasticsearch"
 export ELASTICSEARCH_IMAGE_VERSION="1.6.2"
+dokku elasticsearch:create lolipop
 
 # you can also specify custom environment
 # variables to start the elasticsearch service
 # in semi-colon separated forma
 export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
-
-# create a elasticsearch service
 dokku elasticsearch:create lolipop
 
 # get connection information as follows
 dokku elasticsearch:info lolipop
+
+# you can also retrieve a specific piece of service info via flags
+dokku elasticsearch:info lolipop --config-dir
+dokku elasticsearch:info lolipop --data-dir
+dokku elasticsearch:info lolipop --dsn
+dokku elasticsearch:info lolipop --exposed-ports
+dokku elasticsearch:info lolipop --links
+dokku elasticsearch:info lolipop --status
+dokku elasticsearch:info lolipop --version
 
 # a elasticsearch service can be linked to a
 # container this will use native docker
