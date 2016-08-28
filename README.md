@@ -64,6 +64,7 @@ dokku elasticsearch:info lolipop --config-dir
 dokku elasticsearch:info lolipop --data-dir
 dokku elasticsearch:info lolipop --dsn
 dokku elasticsearch:info lolipop --exposed-ports
+dokku elasticsearch:info lolipop --id
 dokku elasticsearch:info lolipop --links
 dokku elasticsearch:info lolipop --status
 dokku elasticsearch:info lolipop --version
