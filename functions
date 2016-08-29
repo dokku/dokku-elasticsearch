@@ -412,8 +412,10 @@ service_create_container() {
   echo "$ID" > "$SERVICE_ROOT/ID"
 
   dokku_log_info2 "Copying config files into place"
-  retry-docker-command "$ID" "find /etc/elasticsearch -type f -exec cp --no-clobber {} /usr/share/elasticsearch/config/ \;"
-  retry-docker-command "$ID" "ln -sfn /usr/share/elasticsearch/config/ /etc/elasticsearch"
+  retry-docker-command "$ID" "cp -arfp --no-clobber /etc/elasticsearch/. /usr/share/elasticsearch/config/"
+  retry-docker-command "$ID" "echo 'network.host: 0.0.0.0' >> /usr/share/elasticsearch/config/elasticsearch.yml"
+  retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
+  retry-docker-command "$ID" "chown -R root:elasticsearch /etc/elasticsearch"
   docker restart "$ID" > /dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
