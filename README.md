@@ -21,6 +21,7 @@ elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
 elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service with environment variables
 elasticsearch:destroy <name>           Delete the service and stop its container if there are no links left
+elasticsearch:enter <name> [command]   Enter a running couchdb service or run a command
 elasticsearch:export <name> > <file>   NOT IMPLEMENTED
 elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
 elasticsearch:import <name> <file>     NOT IMPLEMENTED
@@ -70,6 +71,14 @@ dokku elasticsearch:info lolipop --links
 dokku elasticsearch:info lolipop --service-root
 dokku elasticsearch:info lolipop --status
 dokku elasticsearch:info lolipop --version
+
+# a bash prompt can be opened against a running service
+# filesystem changes will not be saved to disk
+dokku elasticsearch:enter lolipop
+
+# you may also run a command directly against the service
+# filesystem changes will not be saved to disk
+dokku elasticsearch:enter lolipop ls -lah /
 
 # a elasticsearch service can be linked to a
 # container this will use native docker
