@@ -92,6 +92,9 @@ case "$1" in
   logs)
     echo "$PLUGIN_SERVICE $PLUGIN_IMAGE_VERSION"
     ;;
+  restart)
+    exit 0
+    ;;
   *)
     exit "$DOKKU_NOT_IMPLEMENTED_EXIT"
     ;;
