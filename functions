@@ -117,9 +117,3 @@ service_url() {
   local SERVICE_ALIAS="$(service_alias "$SERVICE")"
   echo "$PLUGIN_SCHEME://$SERVICE_ALIAS:${PLUGIN_DATASTORE_PORTS[0]}"
 }
-
-update_plugin_scheme_for_app() {
-  local APP="$1"
-  local ELASTICSEARCH_DATABASE_SCHEME=$(config_get "$APP" ELASTICSEARCH_DATABASE_SCHEME)
-  PLUGIN_SCHEME=${ELASTICSEARCH_DATABASE_SCHEME:-$PLUGIN_SCHEME}
-}
