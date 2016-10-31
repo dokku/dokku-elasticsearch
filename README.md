@@ -17,6 +17,11 @@ sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elast
 ## commands
 
 ```
+elasticsearch:backup <name> <bucket>   NOT IMPLEMENTED
+elasticsearch:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> NOT IMPLEMENTED
+elasticsearch:backup-deauth <name>     NOT IMPLEMENTED
+elasticsearch:backup-schedule <name> <schedule> <bucket> NOT IMPLEMENTED
+elasticsearch:backup-unschedule <name> NOT IMPLEMENTED
 elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
 elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service with environment variables
