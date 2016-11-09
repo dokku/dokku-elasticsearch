@@ -57,7 +57,7 @@ service_create_container() {
 retry-docker-command() {
   local ID="$1" COMMAND="$2"
   local i=0 success=false
-  until [ $i -ge 10 ]; do
+  until [ $i -ge 100 ]; do
     set +e; docker exec -it "$ID" bash -c "$COMMAND" 2> /dev/null; exit_code=$? ; set -e
     if [[ "$exit_code" == 0 ]]; then
       success=true
