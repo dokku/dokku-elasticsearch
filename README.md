@@ -167,8 +167,3 @@ OR
 - Unlink the service
 - Change ELASTICSEARCH_DATABASE_SCHEME to the desired setting
 - Relink the service
-
-## todo
-
-- implement elasticsearch:clone
-- implement elasticsearch:import
