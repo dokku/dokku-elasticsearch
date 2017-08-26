@@ -25,7 +25,7 @@ elasticsearch:backup-unschedule <name> NOT IMPLEMENTED
 elasticsearch:clone <name> <new-name>  NOT IMPLEMENTED
 elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service with environment variables
-elasticsearch:destroy <name>           Delete the service and stop its container if there are no links left
+elasticsearch:destroy <name>           Delete the service, delete the data and stop its container if there are no links left
 elasticsearch:enter <name> [command]   Enter or run a command in a running elasticsearch service container
 elasticsearch:export <name> > <file>   NOT IMPLEMENTED
 elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
