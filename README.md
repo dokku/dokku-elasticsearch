@@ -17,7 +17,7 @@ sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elast
 ## commands
 
 ```
-elasticsearch:backup <name> <bucket> [--use-iam] NOT IMPLEMENTED
+elasticsearch:backup <name> <bucket> (--use-iam) NOT IMPLEMENTED
 elasticsearch:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>) NOT IMPLEMENTED
 elasticsearch:backup-deauth <name>     NOT IMPLEMENTED
 elasticsearch:backup-schedule <name> <schedule> <bucket> NOT IMPLEMENTED
