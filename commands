@@ -105,7 +105,7 @@ case "$1" in
       declare desc="return $PLUGIN_COMMAND_PREFIX plugin help content"
       cat<<help_content
     $PLUGIN_COMMAND_PREFIX:backup <name> <bucket>, NOT IMPLEMENTED
-    $PLUGIN_COMMAND_PREFIX:backup-auth <name> <aws_access_key_id> <aws_secret_access_key>, NOT IMPLEMENTED
+    $PLUGIN_COMMAND_PREFIX:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>), NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:backup-deauth <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:backup-schedule <name> <schedule> <bucket>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:backup-unschedule <name>, NOT IMPLEMENTED
