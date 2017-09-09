@@ -27,8 +27,16 @@ case "$1" in
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/backup-schedule" "$@"
     ;;
 
+  $PLUGIN_COMMAND_PREFIX:backup-set-encryption)
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/backup-set-encryption" "$@"
+    ;;
+
   $PLUGIN_COMMAND_PREFIX:backup-unschedule)
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/backup-unschedule" "$@"
+    ;;
+
+  $PLUGIN_COMMAND_PREFIX:backup-unset-encryption)
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/backup-unset-encryption" "$@"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:clone)
@@ -108,14 +116,16 @@ case "$1" in
     $PLUGIN_COMMAND_PREFIX:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>), NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:backup-deauth <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:backup-schedule <name> <schedule> <bucket>, NOT IMPLEMENTED
+    $PLUGIN_COMMAND_PREFIX:backup-set-encryption <name> <encryption_key>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:backup-unschedule <name>, NOT IMPLEMENTED
+    $PLUGIN_COMMAND_PREFIX:backup-unset-encryption <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:clone <name> <new-name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:connect <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:create <name>, Create a $PLUGIN_SERVICE service
     $PLUGIN_COMMAND_PREFIX:destroy <name>, Delete the $PLUGIN_SERVICE service, delete the data and stop its container if there are no links left
     $PLUGIN_COMMAND_PREFIX:export <name>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:expose <name> [port], Expose a $PLUGIN_SERVICE service on custom port if provided (random port otherwise)
-    $PLUGIN_COMMAND_PREFIX:import <name> <file>, NOT IMPLEMENTED
+    $PLUGIN_COMMAND_PREFIX:import <name> < <file>, NOT IMPLEMENTED
     $PLUGIN_COMMAND_PREFIX:info <name>, Print the connection information
     $PLUGIN_COMMAND_PREFIX:link <name> <app>, Link the $PLUGIN_SERVICE service to the app
     $PLUGIN_COMMAND_PREFIX:list, List all $PLUGIN_SERVICE services
