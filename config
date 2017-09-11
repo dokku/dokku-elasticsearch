@@ -22,3 +22,5 @@ fi
 if [[ -d "$PLUGIN_DATA_ROOT/*" ]]; then
   rm -rf "${PLUGIN_DATA_ROOT:?}/*"
 fi
+
+export PLUGIN_CONFIG_ROOT="${DOKKU_LIB_ROOT}/config/${PLUGIN_COMMAND_PREFIX}"
