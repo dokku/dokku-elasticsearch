@@ -29,11 +29,13 @@ elasticsearch:connect <name>           NOT IMPLEMENTED
 elasticsearch:create <name>            Create a elasticsearch service with environment variables
 elasticsearch:destroy <name>           Delete the service, delete the data and stop its container if there are no links left
 elasticsearch:enter <name> [command]   Enter or run a command in a running elasticsearch service container
+elasticsearch:exists <service>         Check if the elasticsearch service exists
 elasticsearch:export <name> > <file>   NOT IMPLEMENTED
 elasticsearch:expose <name> [port]     Expose a elasticsearch service on custom port if provided (random port otherwise)
 elasticsearch:import <name> <file>     NOT IMPLEMENTED
 elasticsearch:info <name>              Print the connection information
 elasticsearch:link <name> <app>        Link the elasticsearch service to the app
+elasticsearch:linked <name> <app>      Check if the elasticsearch service is linked to an app
 elasticsearch:list                     List all elasticsearch services
 elasticsearch:logs <name> [-t]         Print the most recent log(s) for this service
 elasticsearch:promote <name> <app>     Promote service <name> as ELASTICSEARCH_URL in <app>
