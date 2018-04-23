@@ -1,4 +1,4 @@
-# dokku elasticsearch (beta) [![Build Status](https://img.shields.io/travis/dokku/dokku-elasticsearch.svg?branch=master "Build Status")](https://travis-ci.org/dokku/dokku-elasticsearch) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
+# dokku elasticsearch [![Build Status](https://img.shields.io/travis/dokku/dokku-elasticsearch.svg?branch=master "Build Status")](https://travis-ci.org/dokku/dokku-elasticsearch) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
 
 Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 2.3.5](https://hub.docker.com/_/elasticsearch/).
 
