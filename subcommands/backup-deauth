@@ -11,10 +11,11 @@ service-backup-deauth-cmd() {
   declare desc="removes backup authentication for the $PLUGIN_SERVICE service"
   local cmd="$PLUGIN_COMMAND_PREFIX:backup-deauth" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare SERVICE="$1"
+  is_implemented_command "$cmd" || dokku_log_fail "Not yet implemented"
 
   [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
   verify_service_name "$SERVICE"
-  dokku_log_fail "Not yet implemented"
+  service_backup_deauth "$SERVICE"
 }
 
 service-backup-deauth-cmd "$@"
