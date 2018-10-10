@@ -46,6 +46,7 @@ elasticsearch:start <name>             Start a previously stopped elasticsearch 
 elasticsearch:stop <name>              Stop a running elasticsearch service
 elasticsearch:unexpose <name>          Unexpose a previously exposed elasticsearch service
 elasticsearch:unlink <name> <app>      Unlink the elasticsearch service from the app
+elasticsearch:upgrade <name>           Upgrade service <service> to the specified version
 ```
 
 ## usage
