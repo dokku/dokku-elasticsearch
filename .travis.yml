@@ -7,4 +7,6 @@ env:
   - DOKKU_VERSION=v0.6.0 DOKKU_SYSTEM_GROUP=travis DOKKU_SYSTEM_USER=travis
   - DOKKU_VERSION=v0.5.0 DOKKU_SYSTEM_GROUP=travis DOKKU_SYSTEM_USER=travis
   - DOKKU_VERSION=v0.4.0 DOKKU_SYSTEM_GROUP=travis DOKKU_SYSTEM_USER=travis
+before_script:
+  - sudo sysctl -w vm.max_map_count=262144
 script: make test
