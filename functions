@@ -26,6 +26,8 @@ service_create() {
 
   service_parse_args "${@:2}"
 
+  service_check_sysctl
+
   if ! service_image_exists "$SERVICE"; then
     if [[ "$PLUGIN_DISABLE_PULL" == "true" ]]; then
       dokku_log_warn "${PLUGIN_DISABLE_PULL_VARIABLE} environment variable detected. Not running pull command." 1>&2
@@ -136,4 +138,13 @@ service_url() {
   local SERVICE="$1"
   local SERVICE_DNS_HOSTNAME="$(service_dns_hostname "$SERVICE")"
   echo "$PLUGIN_SCHEME://$SERVICE_DNS_HOSTNAME:${PLUGIN_DATASTORE_PORTS[0]}"
+}
+
+service_check_sysctl() {
+  local VM_MAX_MAP_COUNT_CURRENT=$(sysctl -n vm.max_map_count)
+  local VM_MAX_MAP_COUNT_REQUIRED=262144
+
+  if [ "$VM_MAX_MAP_COUNT_CURRENT" -lt "$VM_MAX_MAP_COUNT_REQUIRED" ]; then
+    dokku_log_fail "Please update /etc/systctl.conf with 'vm.max_map_count = 262144' to accommodate Elasticsearch."
+  fi
 }
