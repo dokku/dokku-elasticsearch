@@ -32,4 +32,4 @@ if [[ ! -f $BIN_STUBS/plugn ]]; then
   find "$DOKKU_ROOT/plugins" -mindepth 1 -maxdepth 1 -type d ! -name 'available' ! -name 'enabled' -exec ln -s {} "$DOKKU_ROOT/plugins/enabled" \;
 fi
 
-sysctl -w vm.max_map_count=262144
+sudo sysctl -w vm.max_map_count=262144
