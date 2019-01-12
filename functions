@@ -163,6 +163,6 @@ service_check_sysctl() {
   local VM_MAX_MAP_COUNT_REQUIRED=262144
 
   if [ "$VM_MAX_MAP_COUNT_CURRENT" -lt "$VM_MAX_MAP_COUNT_REQUIRED" ]; then
-    dokku_log_fail "Please update /etc/systctl.conf with 'vm.max_map_count = 262144' to accommodate Elasticsearch."
+    dokku_log_fail "Please update /etc/systctl.conf with 'vm.max_map_count = 262144' to accommodate ElasticSearch, for ex.: echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf; sudo sysctl -p"
   fi
 }
