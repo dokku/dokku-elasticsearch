@@ -26,7 +26,11 @@ service_create() {
 
   service_parse_args "${@:2}"
 
-  service_check_sysctl
+  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1 )
+
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ne "2" ]]; then
+    service_check_sysctl
+  fi
 
   if ! service_image_exists "$SERVICE"; then
     if [[ "$PLUGIN_DISABLE_PULL" == "true" ]]; then
