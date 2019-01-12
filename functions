@@ -86,7 +86,7 @@ service_create_container() {
 
     retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-        retry-docker-command "$ID" "ln -s /usr/share/elasticsearch/config /etc/elasticsearch"
+      retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
     fi
   fi
 
