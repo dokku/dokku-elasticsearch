@@ -75,10 +75,11 @@ service_create_container() {
     dokku_log_info2 "Extracting config files"
     local TMPID=$(docker create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     docker cp "${TMPID}:/usr/share/elasticsearch/config/" - | tar -x -C "$SERVICE_HOST_ROOT/config" --strip-components=1
-    docker rm -v "${TMPID}"
-    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "6" ]]; then
-      sed -i.bak 's#Xms2g#Xms512m#g; s#Xmx2g#Xmx512m#g' "$SERVICE_HOST_ROOT/config/jvm.options"
+    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
+      docker cp "${TMPID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_HOST_ROOT/config"
     fi
+    docker rm -v "${TMPID}"
+    sed -i.bak 's#Xms2g#Xms512m#g; s#Xmx2g#Xmx512m#g' "$SERVICE_HOST_ROOT/config/jvm.options"
 
     ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/config:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     echo "$ID" > "$SERVICE_ROOT/ID"
