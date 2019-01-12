@@ -26,6 +26,8 @@ service_create() {
 
   service_parse_args "${@:2}"
 
+  service_check_sysctl
+
   if ! service_image_exists "$SERVICE"; then
     if [[ "$PLUGIN_DISABLE_PULL" == "true" ]]; then
       dokku_log_warn "${PLUGIN_DISABLE_PULL_VARIABLE} environment variable detected. Not running pull command." 1>&2
@@ -62,6 +64,7 @@ service_create_container() {
   dokku_log_info2 "Copying config files into place"
   retry-docker-command "$ID" "cp -arfp --no-clobber /etc/elasticsearch/. /usr/share/elasticsearch/config/"
   retry-docker-command "$ID" "echo 'network.host: 0.0.0.0' >> /usr/share/elasticsearch/config/elasticsearch.yml"
+  retry-docker-command "$ID" "sed -i.bak 's#Xms2g#Xms512m#g; s#Xmx2g#Xmx512m#g' /usr/share/elasticsearch/config/jvm.options"
   retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
   retry-docker-command "$ID" "chown -R root:elasticsearch /etc/elasticsearch"
   docker restart "$ID" > /dev/null
@@ -136,4 +139,13 @@ service_url() {
   local SERVICE="$1"
   local SERVICE_DNS_HOSTNAME="$(service_dns_hostname "$SERVICE")"
   echo "$PLUGIN_SCHEME://$SERVICE_DNS_HOSTNAME:${PLUGIN_DATASTORE_PORTS[0]}"
+}
+
+service_check_sysctl() {
+  local VM_MAX_MAP_COUNT_CURRENT=$(sysctl -n vm.max_map_count)
+  local VM_MAX_MAP_COUNT_REQUIRED=262144
+
+  if [ "$VM_MAX_MAP_COUNT_CURRENT" -lt "$VM_MAX_MAP_COUNT_REQUIRED" ]; then
+    dokku_log_fail "Please update /etc/systctl.conf with 'vm.max_map_count = 262144' to accommodate Elasticsearch."
+  fi
 }
