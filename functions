@@ -85,6 +85,9 @@ service_create_container() {
     echo "$ID" > "$SERVICE_ROOT/ID"
 
     retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
+    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
+        retry-docker-command "$ID" "ln -s /usr/share/elasticsearch/config /etc/elasticsearch"
+    fi
   fi
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
