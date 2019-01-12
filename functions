@@ -89,6 +89,8 @@ service_create_container() {
     fi
 
     retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
+
+    docker restart "$ID" > /dev/null
   fi
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
