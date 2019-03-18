@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 export ELASTICSEARCH_IMAGE=${ELASTICSEARCH_IMAGE:="elasticsearch"}
 export ELASTICSEARCH_IMAGE_VERSION=${ELASTICSEARCH_IMAGE_VERSION:="2.3.5"}
-export ELASTICSEARCH_ROOT=${ELASTICSEARCH_ROOT:="/var/lib/dokku/services/elasticsearch"}
+export ELASTICSEARCH_ROOT=${ELASTICSEARCH_ROOT:="$DOKKU_LIB_ROOT/services/elasticsearch"}
 export ELASTICSEARCH_HOST_ROOT=${ELASTICSEARCH_HOST_ROOT:=$ELASTICSEARCH_ROOT}
 
 export PLUGIN_UNIMPLEMENTED_SUBCOMMANDS=("backup" "backup-auth" "backup-deauth" "backup-schedule" "backup-schedule-cat" "backup-set-encryption" "backup-unschedule" "backup-unset-encryption" "clone" "connect" "export" "import")
