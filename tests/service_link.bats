@@ -3,13 +3,16 @@ load test_helper
 
 setup() {
   dokku "$PLUGIN_COMMAND_PREFIX:create" l
+  dokku "$PLUGIN_COMMAND_PREFIX:create" m
   dokku apps:create my_app
 }
 
 teardown() {
+  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" m
   dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l
   dokku --force apps:destroy my_app
 }
+
 
 @test "($PLUGIN_COMMAND_PREFIX:link) error when there are no arguments" {
   run dokku "$PLUGIN_COMMAND_PREFIX:link"
@@ -68,8 +71,14 @@ teardown() {
   dokku config:set my_app ELASTICSEARCH_URL=http://host:9200
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku config my_app
-  assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_"
+  assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_AQUA_URL"
   assert_success
+
+  dokku "$PLUGIN_COMMAND_PREFIX:link" m my_app
+  run dokku config my_app
+  assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_BLACK_URL"
+  assert_success
+  dokku "$PLUGIN_COMMAND_PREFIX:unlink" m my_app
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
