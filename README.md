@@ -5,13 +5,13 @@ It's possible to install Elasticsearch 5.x, but it does require some manual setu
 
 ## requirements
 
-- dokku 0.4.x+
+- dokku 0.12.x+
 - docker 1.8.x
 
 ## installation
 
 ```shell
-# on 0.4.x+
+# on 0.12.x+
 sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsearch
 ```
 

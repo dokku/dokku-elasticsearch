@@ -2,45 +2,68 @@
 load test_helper
 
 setup() {
-  dokku "$PLUGIN_COMMAND_PREFIX:create" l >&2
-  dokku apps:create my_app >&2
+  dokku "$PLUGIN_COMMAND_PREFIX:create" l
+  dokku "$PLUGIN_COMMAND_PREFIX:create" m
+  dokku apps:create my_app
 }
 
 teardown() {
-  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l >&2
-  rm -rf "$DOKKU_ROOT/my_app"
+  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" m
+  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l
+  dokku --force apps:destroy my_app
 }
+
 
 @test "($PLUGIN_COMMAND_PREFIX:link) error when there are no arguments" {
   run dokku "$PLUGIN_COMMAND_PREFIX:link"
-  assert_contains "${lines[*]}" "Please specify a name for the service"
+  echo "output: $output"
+  echo "status: $status"
+  assert_contains "${lines[*]}" "Please specify a valid name for the service"
+  assert_failure
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:link) error when the app argument is missing" {
   run dokku "$PLUGIN_COMMAND_PREFIX:link" l
+  echo "output: $output"
+  echo "status: $status"
   assert_contains "${lines[*]}" "Please specify an app to run the command on"
+  assert_failure
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:link) error when the app does not exist" {
   run dokku "$PLUGIN_COMMAND_PREFIX:link" l not_existing_app
+  echo "output: $output"
+  echo "status: $status"
   assert_contains "${lines[*]}" "App not_existing_app does not exist"
+  assert_failure
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:link) error when the service does not exist" {
   run dokku "$PLUGIN_COMMAND_PREFIX:link" not_existing_service my_app
+  echo "output: $output"
+  echo "status: $status"
   assert_contains "${lines[*]}" "service not_existing_service does not exist"
+  assert_failure
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:link) error when the service is already linked to app" {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
+  echo "output: $output"
+  echo "status: $status"
   assert_contains "${lines[*]}" "Already linked as ELASTICSEARCH_URL"
+  assert_failure
+
+  dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:link) exports ELASTICSEARCH_URL to app" {
-  dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
+  run dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
+  echo "output: $output"
+  echo "status: $status"
   url=$(dokku config:get my_app ELASTICSEARCH_URL)
   assert_contains "$url" "http://dokku-elasticsearch-l:9200"
+  assert_success
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
@@ -48,7 +71,14 @@ teardown() {
   dokku config:set my_app ELASTICSEARCH_URL=http://host:9200
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku config my_app
-  assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_"
+  assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_AQUA_URL"
+  assert_success
+
+  dokku "$PLUGIN_COMMAND_PREFIX:link" m my_app
+  run dokku config my_app
+  assert_contains "${lines[*]}" "DOKKU_ELASTICSEARCH_BLACK_URL"
+  assert_success
+  dokku "$PLUGIN_COMMAND_PREFIX:unlink" m my_app
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
@@ -56,6 +86,7 @@ teardown() {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku docker-options my_app
   assert_contains "${lines[*]}" "--link dokku.elasticsearch.l:dokku-elasticsearch-l"
+  assert_success
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
@@ -64,6 +95,7 @@ teardown() {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   url=$(dokku config:get my_app ELASTICSEARCH_URL)
   assert_contains "$url" "elasticsearch2://dokku-elasticsearch-l:9200"
+  assert_success
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
@@ -71,6 +103,7 @@ teardown() {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app --querystring "pool=5"
   url=$(dokku config:get my_app ELASTICSEARCH_URL)
   assert_contains "$url" "?pool=5"
+  assert_success
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
 
@@ -78,5 +111,6 @@ teardown() {
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app --alias "ALIAS"
   url=$(dokku config:get my_app ALIAS_URL)
   assert_contains "$url" "http://dokku-elasticsearch-l:9200"
+  assert_success
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }

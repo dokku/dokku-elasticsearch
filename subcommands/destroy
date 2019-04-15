@@ -13,7 +13,7 @@ service-destroy-cmd() {
   local cmd="$PLUGIN_COMMAND_PREFIX:destroy" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare SERVICE="$1" FORCE_FLAG="$2"
 
-  [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
+  [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a valid name for the service"
   verify_service_name "$SERVICE"
   SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
   SERVICE_HOST_ROOT="$PLUGIN_DATA_HOST_ROOT/$SERVICE"
@@ -39,20 +39,10 @@ service-destroy-cmd() {
 
   dokku_log_info2_quiet "Deleting $SERVICE"
   service_backup_unschedule "$SERVICE"
-  if [[ -n $(docker ps -aq -f name="$SERVICE_NAME") ]]; then
-    dokku_log_verbose_quiet "Deleting container data"
-    service_stop "$SERVICE"
-    sleep 1
-
-    dokku_log_verbose_quiet "Removing container"
-    docker rm -v "$SERVICE_NAME" > /dev/null
-    sleep 1
-  else
-    dokku_log_verbose_quiet "No container exists for $SERVICE"
-  fi
+  service_container_rm "$SERVICE"
 
   dokku_log_verbose_quiet "Removing data"
-  docker run --rm -v "$SERVICE_HOST_ROOT/data:/data" -v "$SERVICE_HOST_ROOT/config:/config" busybox chmod 777 -R /config /data
+  docker run --rm -v "$SERVICE_HOST_ROOT/data:/data" -v "$SERVICE_HOST_ROOT/config:/config" busybox:1.30.1-uclibc chmod 777 -R /config /data
   rm -rf "$SERVICE_ROOT"
 
   dokku_log_info2 "$PLUGIN_SERVICE container deleted: $SERVICE"
