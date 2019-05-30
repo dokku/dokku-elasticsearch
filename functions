@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
-set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+set -eo pipefail
+[[ $DOKKU_TRACE ]] && set -x
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common-functions"
 source "$PLUGIN_BASE_PATH/common/functions"
 source "$PLUGIN_AVAILABLE_PATH/config/functions"
@@ -21,11 +22,12 @@ service_create() {
   is_valid_service_name "$SERVICE" || dokku_log_fail "Please specify a valid name for the service. Valid characters are: [A-Za-z0-9_]+"
   [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a valid name for the service"
   [[ ! -d "$PLUGIN_DATA_ROOT/$SERVICE" ]] || dokku_log_fail "$PLUGIN_SERVICE service $SERVICE already exists"
-  SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
+  SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  LINKS_FILE="$SERVICE_ROOT/LINKS"
 
   service_parse_args "${@:2}"
 
-  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1 )
+  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
 
   if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ne "2" ]]; then
     service_check_sysctl
@@ -48,9 +50,9 @@ service_create() {
 
   [[ -n "$SERVICE_CUSTOM_ENV" ]] && ELASTICSEARCH_CUSTOM_ENV="$SERVICE_CUSTOM_ENV"
   if [[ -n $ELASTICSEARCH_CUSTOM_ENV ]]; then
-    echo "$ELASTICSEARCH_CUSTOM_ENV" | tr ';' "\n" > "$SERVICE_ROOT/ENV"
+    echo "$ELASTICSEARCH_CUSTOM_ENV" | tr ';' "\n" >"$SERVICE_ROOT/ENV"
   else
-    echo "" > "$SERVICE_ROOT/ENV"
+    echo "" >"$SERVICE_ROOT/ENV"
   fi
   service_create_container "$SERVICE"
 }
@@ -61,11 +63,11 @@ service_create_container() {
   local SERVICE_HOST_ROOT="$PLUGIN_DATA_HOST_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
 
-  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1 )
+  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
 
   if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "2" ]]; then
     ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/config:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-    echo "$ID" > "$SERVICE_ROOT/ID"
+    echo "$ID" >"$SERVICE_ROOT/ID"
 
     dokku_log_info2 "Copying config files into place"
     retry-docker-command "$ID" "cp -arfp --no-clobber /etc/elasticsearch/. /usr/share/elasticsearch/config/"
@@ -84,7 +86,7 @@ service_create_container() {
     sed -i.bak 's#Xms2g#Xms512m#g; s#Xmx2g#Xmx512m#g' "$SERVICE_HOST_ROOT/config/jvm.options"
 
     ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/config:/usr/share/elasticsearch/config" -v "$SERVICE_HOST_ROOT/config:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-    echo "$ID" > "$SERVICE_ROOT/ID"
+    echo "$ID" >"$SERVICE_ROOT/ID"
 
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
       retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
@@ -93,10 +95,10 @@ service_create_container() {
     retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
   fi
 
-  docker restart "$ID" > /dev/null
+  docker restart "$ID" >/dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
-  docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokku/wait:0.3.0 -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 > /dev/null
+  docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokku/wait:0.3.0 -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
@@ -106,12 +108,15 @@ retry-docker-command() {
   local ID="$1" COMMAND="$2"
   local i=0 success=false
   until [ $i -ge 100 ]; do
-    set +e; docker exec -it "$ID" sh -c "$COMMAND" 2> /dev/null; exit_code=$? ; set -e
+    set +e
+    docker exec -it "$ID" sh -c "$COMMAND" 2>/dev/null
+    exit_code=$?
+    set -e
     if [[ "$exit_code" == 0 ]]; then
       success=true
       break
     fi
-    i=$(( i + 1 ))
+    i=$((i + 1))
     sleep 1
   done
   if [[ $i -gt 0 ]]; then
@@ -151,7 +156,7 @@ service_start() {
   local PREVIOUS_ID=$(docker ps -aq --no-trunc --filter "status=exited" --filter "name=^/$SERVICE_NAME$" --format '{{ .ID }}') || true
 
   if [[ -n $PREVIOUS_ID ]]; then
-    docker start "$PREVIOUS_ID" > /dev/null
+    docker start "$PREVIOUS_ID" >/dev/null
     service_port_unpause "$SERVICE"
     dokku_log_info2 "Container started"
   elif service_image_exists "$SERVICE"; then
