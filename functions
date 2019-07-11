@@ -100,7 +100,7 @@ service_create_container() {
   docker restart "$ID" >/dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
-  docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokku/wait:0.3.0 -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
+  docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokku/wait:0.4.0 -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
