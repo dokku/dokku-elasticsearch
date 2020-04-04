@@ -18,24 +18,12 @@ sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elast
 
 ```
 elasticsearch:app-links <app>                      # list all elasticsearch service links for a given app
-elasticsearch:backup <service> <bucket-name> [--use-iam] # creates a backup of the elasticsearch service to an existing s3 bucket
-elasticsearch:backup-auth <service> <aws-access-key-id> <aws-secret-access-key> <aws-default-region> <aws-signature-version> <endpoint-url> # sets up authentication for backups on the elasticsearch service
-elasticsearch:backup-deauth <service>              # removes backup authentication for the elasticsearch service
-elasticsearch:backup-schedule <service> <schedule> <bucket-name> [--use-iam] # schedules a backup of the elasticsearch service
-elasticsearch:backup-schedule-cat <service>        # cat the contents of the configured backup cronfile for the service
-elasticsearch:backup-set-encryption <service> <passphrase> # sets encryption for all future backups of elasticsearch service
-elasticsearch:backup-unschedule <service>          # unschedules the backup of the elasticsearch service
-elasticsearch:backup-unset-encryption <service>    # unsets encryption for future backups of the elasticsearch service
-elasticsearch:clone <service> <new-service> [--clone-flags...] # create container <new-name> then copy data from <name> into <new-name>
-elasticsearch:connect <service>                    # connect to the service via the elasticsearch connection tool
 elasticsearch:create <service> [--create-flags...] # create a elasticsearch service
 elasticsearch:destroy <service> [-f|--force]       # delete the elasticsearch service/data/container if there are no links left
 elasticsearch:enter <service>                      # enter or run a command in a running elasticsearch service container
 elasticsearch:exists <service>                     # check if the elasticsearch service exists
-elasticsearch:export <service>                     # export a dump of the elasticsearch service database
 elasticsearch:expose <service> <ports...>          # expose a elasticsearch service on custom port if provided (random port otherwise)
-elasticsearch:import <service>                     # import a dump into the elasticsearch service database
-elasticsearch:info <service> [--single-info-flag]  # print the connection information
+elasticsearch:info <service> [--single-info-flag]  # print the service information
 elasticsearch:link <service> <app> [--link-flags...] # link the elasticsearch service to the app
 elasticsearch:linked <service> <app>               # check if the elasticsearch service is linked to an app
 elasticsearch:links <service>                      # list all apps linked to the elasticsearch service
@@ -55,20 +43,7 @@ elasticsearch:upgrade <service> [--upgrade-flags...] # upgrade service <service>
 Help for any commands can be displayed by specifying the command as an argument to elasticsearch:help. Please consult the `elasticsearch:help` command for any undocumented commands.
 
 ### Basic Usage
-### list all elasticsearch services
 
-```shell
-# usage
-dokku elasticsearch:list 
-```
-
-examples:
-
-List all services:
-
-```shell
-dokku elasticsearch:list
-```
 ### create a elasticsearch service
 
 ```shell
@@ -76,15 +51,13 @@ dokku elasticsearch:list
 dokku elasticsearch:create <service> [--create-flags...]
 ```
 
-examples:
-
 Create a elasticsearch service named lolipop:
 
 ```shell
 dokku elasticsearch:create lolipop
 ```
 
-You can also specify the image and image version to use for the service. It *must* be compatible with the ${plugin_image} image. :
+You can also specify the image and image version to use for the service. It *must* be compatible with the ${plugin_image} image.
 
 ```shell
 export ELASTICSEARCH_IMAGE="${PLUGIN_IMAGE}"
@@ -92,20 +65,19 @@ export ELASTICSEARCH_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku elasticsearch:create lolipop
 ```
 
-You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form. :
+You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form.
 
 ```shell
 export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku elasticsearch:create lolipop
 ```
-### print the connection information
+
+### print the service information
 
 ```shell
 # usage
 dokku elasticsearch:info <service> [--single-info-flag]
 ```
-
-examples:
 
 Get connection information as follows:
 
@@ -127,14 +99,26 @@ dokku elasticsearch:info lolipop --service-root
 dokku elasticsearch:info lolipop --status
 dokku elasticsearch:info lolipop --version
 ```
+
+### list all elasticsearch services
+
+```shell
+# usage
+dokku elasticsearch:list 
+```
+
+List all services:
+
+```shell
+dokku elasticsearch:list
+```
+
 ### print the most recent log(s) for this service
 
 ```shell
 # usage
 dokku elasticsearch:logs <service> [-t|--tail]
 ```
-
-examples:
 
 You can tail logs for a particular service:
 
@@ -147,6 +131,7 @@ By default, logs will not be tailed, but you can do this with the --tail flag:
 ```shell
 dokku elasticsearch:logs lolipop --tail
 ```
+
 ### link the elasticsearch service to the app
 
 ```shell
@@ -154,9 +139,7 @@ dokku elasticsearch:logs lolipop --tail
 dokku elasticsearch:link <service> <app> [--link-flags...]
 ```
 
-examples:
-
-A elasticsearch service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app. :
+A elasticsearch service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app.
 
 > NOTE: this will restart your app
 
@@ -187,7 +170,7 @@ The host exposed here only works internally in docker containers. If you want yo
 dokku elasticsearch:link other_service playground
 ```
 
-It is possible to change the protocol for elasticsearch_url by setting the environment variable elasticsearch_database_scheme on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding. :
+It is possible to change the protocol for elasticsearch_url by setting the environment variable elasticsearch_database_scheme on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding.
 
 ```shell
 dokku config:set playground ELASTICSEARCH_DATABASE_SCHEME=http2
@@ -199,14 +182,13 @@ This will cause elasticsearch_url to be set as:
 ```
 http2://lolipop:SOME_PASSWORD@dokku-elasticsearch-lolipop:9200/lolipop
 ```
+
 ### unlink the elasticsearch service from the app
 
 ```shell
 # usage
 dokku elasticsearch:unlink <service> <app>
 ```
-
-examples:
 
 You can unlink a elasticsearch service:
 
@@ -215,39 +197,11 @@ You can unlink a elasticsearch service:
 ```shell
 dokku elasticsearch:unlink lolipop playground
 ```
-### delete the elasticsearch service/data/container if there are no links left
-
-```shell
-# usage
-dokku elasticsearch:destroy <service> [-f|--force]
-```
-
-examples:
-
-Destroy the service, it's data, and the running container:
-
-```shell
-dokku elasticsearch:destroy lolipop
-```
 
 ### Service Lifecycle
 
 The lifecycle of each service can be managed through the following commands:
 
-### connect to the service via the elasticsearch connection tool
-
-```shell
-# usage
-dokku elasticsearch:connect <service>
-```
-
-examples:
-
-Connect to the service via the elasticsearch connection tool:
-
-```shell
-dokku elasticsearch:connect lolipop
-```
 ### enter or run a command in a running elasticsearch service container
 
 ```shell
@@ -255,19 +209,18 @@ dokku elasticsearch:connect lolipop
 dokku elasticsearch:enter <service>
 ```
 
-examples:
-
-A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk. :
+A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
 
 ```shell
 dokku elasticsearch:enter lolipop
 ```
 
-You may also run a command directly against the service. Filesystem changes will not be saved to disk. :
+You may also run a command directly against the service. Filesystem changes will not be saved to disk.
 
 ```shell
 dokku elasticsearch:enter lolipop touch /tmp/test
 ```
+
 ### expose a elasticsearch service on custom port if provided (random port otherwise)
 
 ```shell
@@ -275,13 +228,12 @@ dokku elasticsearch:enter lolipop touch /tmp/test
 dokku elasticsearch:expose <service> <ports...>
 ```
 
-examples:
-
 Expose the service on the service's normal ports, allowing access to it from the public interface (0. 0. 0. 0):
 
 ```shell
 dokku elasticsearch:expose lolipop ${PLUGIN_DATASTORE_PORTS[@]}
 ```
+
 ### unexpose a previously exposed elasticsearch service
 
 ```shell
@@ -289,21 +241,18 @@ dokku elasticsearch:expose lolipop ${PLUGIN_DATASTORE_PORTS[@]}
 dokku elasticsearch:unexpose <service>
 ```
 
-examples:
-
 Unexpose the service, removing access to it from the public interface (0. 0. 0. 0):
 
 ```shell
 dokku elasticsearch:unexpose lolipop
 ```
+
 ### promote service <service> as ELASTICSEARCH_URL in <app>
 
 ```shell
 # usage
 dokku elasticsearch:promote <service> <app>
 ```
-
-examples:
 
 If you have a elasticsearch service linked to an app and try to link another elasticsearch service another link environment variable will be generated automatically:
 
@@ -326,20 +275,7 @@ ELASTICSEARCH_URL=http://other_service:ANOTHER_PASSWORD@dokku-elasticsearch-othe
 DOKKU_ELASTICSEARCH_BLUE_URL=http://other_service:ANOTHER_PASSWORD@dokku-elasticsearch-other-service:9200/other_service
 DOKKU_ELASTICSEARCH_SILVER_URL=http://lolipop:SOME_PASSWORD@dokku-elasticsearch-lolipop:9200/lolipop
 ```
-### graceful shutdown and restart of the elasticsearch service container
 
-```shell
-# usage
-dokku elasticsearch:restart <service>
-```
-
-examples:
-
-Restart the service:
-
-```shell
-dokku elasticsearch:restart lolipop
-```
 ### start a previously stopped elasticsearch service
 
 ```shell
@@ -347,13 +283,12 @@ dokku elasticsearch:restart lolipop
 dokku elasticsearch:start <service>
 ```
 
-examples:
-
 Start the service:
 
 ```shell
 dokku elasticsearch:start lolipop
 ```
+
 ### stop a running elasticsearch service
 
 ```shell
@@ -361,21 +296,31 @@ dokku elasticsearch:start lolipop
 dokku elasticsearch:stop <service>
 ```
 
-examples:
-
 Stop the service and the running container:
 
 ```shell
 dokku elasticsearch:stop lolipop
 ```
+
+### graceful shutdown and restart of the elasticsearch service container
+
+```shell
+# usage
+dokku elasticsearch:restart <service>
+```
+
+Restart the service:
+
+```shell
+dokku elasticsearch:restart lolipop
+```
+
 ### upgrade service <service> to the specified versions
 
 ```shell
 # usage
 dokku elasticsearch:upgrade <service> [--upgrade-flags...]
 ```
-
-examples:
 
 You can upgrade an existing service to a new image or image-version:
 
@@ -394,27 +339,12 @@ Service scripting can be executed using the following commands:
 dokku elasticsearch:app-links <app>
 ```
 
-examples:
-
-List all elasticsearch services that are linked to the 'playground' app. :
+List all elasticsearch services that are linked to the 'playground' app.
 
 ```shell
 dokku elasticsearch:app-links playground
 ```
-### create container <new-name> then copy data from <name> into <new-name>
 
-```shell
-# usage
-dokku elasticsearch:clone <service> <new-service> [--clone-flags...]
-```
-
-examples:
-
-You can clone an existing service to a new one:
-
-```shell
-dokku elasticsearch:clone lolipop lolipop-2
-```
 ### check if the elasticsearch service exists
 
 ```shell
@@ -422,13 +352,12 @@ dokku elasticsearch:clone lolipop lolipop-2
 dokku elasticsearch:exists <service>
 ```
 
-examples:
-
-Here we check if the lolipop elasticsearch service exists. :
+Here we check if the lolipop elasticsearch service exists.
 
 ```shell
 dokku elasticsearch:exists lolipop
 ```
+
 ### check if the elasticsearch service is linked to an app
 
 ```shell
@@ -436,13 +365,12 @@ dokku elasticsearch:exists lolipop
 dokku elasticsearch:linked <service> <app>
 ```
 
-examples:
-
-Here we check if the lolipop elasticsearch service is linked to the 'playground' app. :
+Here we check if the lolipop elasticsearch service is linked to the 'playground' app.
 
 ```shell
 dokku elasticsearch:linked lolipop playground
 ```
+
 ### list all apps linked to the elasticsearch service
 
 ```shell
@@ -450,198 +378,10 @@ dokku elasticsearch:linked lolipop playground
 dokku elasticsearch:links <service>
 ```
 
-examples:
-
-List all apps linked to the 'lolipop' elasticsearch service. :
+List all apps linked to the 'lolipop' elasticsearch service.
 
 ```shell
 dokku elasticsearch:links lolipop
-```
-
-### Data Management
-
-The underlying service data can be imported and exported with the following commands:
-
-### import a dump into the elasticsearch service database
-
-```shell
-# usage
-dokku elasticsearch:import <service>
-```
-
-examples:
-
-Import a datastore dump:
-
-```shell
-dokku elasticsearch:import lolipop < database.dump
-```
-### export a dump of the elasticsearch service database
-
-```shell
-# usage
-dokku elasticsearch:export <service>
-```
-
-examples:
-
-By default, datastore output is exported to stdout:
-
-```shell
-dokku elasticsearch:export lolipop
-```
-
-You can redirect this output to a file:
-
-```shell
-dokku elasticsearch:export lolipop > lolipop.dump
-```
-
-### Backups
-
-Datastore backups are supported via AWS S3 and S3 compatible services like [minio](https://github.com/minio/minio).
-
-You may skip the `backup-auth` step if your dokku install is running within EC2 and has access to the bucket via an IAM profile. In that case, use the `--use-iam` option with the `backup` command.
-
-Backups can be performed using the backup commands:
-
-### sets up authentication for backups on the elasticsearch service
-
-```shell
-# usage
-dokku elasticsearch:backup-auth <service> <aws-access-key-id> <aws-secret-access-key> <aws-default-region> <aws-signature-version> <endpoint-url>
-```
-
-examples:
-
-Setup s3 backup authentication:
-
-```shell
-dokku elasticsearch:backup-auth lolipop AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
-```
-
-Setup s3 backup authentication with different region:
-
-```shell
-dokku elasticsearch:backup-auth lolipop AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION
-```
-
-Setup s3 backup authentication with different signature version and endpoint:
-
-```shell
-dokku elasticsearch:backup-auth lolipop AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGION AWS_SIGNATURE_VERSION ENDPOINT_URL
-```
-
-More specific example for minio auth:
-
-```shell
-dokku elasticsearch:backup-auth lolipop MINIO_ACCESS_KEY_ID MINIO_SECRET_ACCESS_KEY us-east-1 s3v4 https://YOURMINIOSERVICE
-```
-### removes backup authentication for the elasticsearch service
-
-```shell
-# usage
-dokku elasticsearch:backup-deauth <service>
-```
-
-examples:
-
-Remove s3 authentication:
-
-```shell
-dokku elasticsearch:backup-deauth lolipop
-```
-### creates a backup of the elasticsearch service to an existing s3 bucket
-
-```shell
-# usage
-dokku elasticsearch:backup <service> <bucket-name> [--use-iam]
-```
-
-examples:
-
-Backup the 'lolipop' service to the 'my-s3-bucket' bucket on aws:
-
-```shell
-dokku elasticsearch:backup lolipop my-s3-bucket --use-iam
-```
-### sets encryption for all future backups of elasticsearch service
-
-```shell
-# usage
-dokku elasticsearch:backup-set-encryption <service> <passphrase>
-```
-
-examples:
-
-Set a gpg passphrase for backups:
-
-```shell
-dokku elasticsearch:backup-set-encryption lolipop
-```
-### unsets encryption for future backups of the elasticsearch service
-
-```shell
-# usage
-dokku elasticsearch:backup-unset-encryption <service>
-```
-
-examples:
-
-Unset a gpg encryption key for backups:
-
-```shell
-dokku elasticsearch:backup-unset-encryption lolipop
-```
-### schedules a backup of the elasticsearch service
-
-```shell
-# usage
-dokku elasticsearch:backup-schedule <service> <schedule> <bucket-name> [--use-iam]
-```
-
-examples:
-
-Schedule a backup:
-
-> 'schedule' is a crontab expression, eg. "0 3 * * *" for each day at 3am
-
-```shell
-dokku elasticsearch:backup-schedule lolipop "0 3 * * *" my-s3-bucket
-```
-
-Schedule a backup and authenticate via iam:
-
-```shell
-dokku elasticsearch:backup-schedule lolipop "0 3 * * *" my-s3-bucket --use-iam
-```
-### cat the contents of the configured backup cronfile for the service
-
-```shell
-# usage
-dokku elasticsearch:backup-schedule-cat <service>
-```
-
-examples:
-
-Cat the contents of the configured backup cronfile for the service:
-
-```shell
-dokku elasticsearch:backup-schedule-cat lolipop
-```
-### unschedules the backup of the elasticsearch service
-
-```shell
-# usage
-dokku elasticsearch:backup-unschedule <service>
-```
-
-examples:
-
-Remove the scheduled backup from cron:
-
-```shell
-dokku elasticsearch:backup-unschedule lolipop
 ```
 
 ### Disabling `docker pull` calls
