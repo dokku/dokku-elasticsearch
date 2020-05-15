@@ -65,15 +65,15 @@ Create a elasticsearch service named lolipop:
 dokku elasticsearch:create lolipop
 ```
 
-You can also specify the image and image version to use for the service. It *must* be compatible with the ${plugin_image} image.
+You can also specify the image and image version to use for the service. It *must* be compatible with the elasticsearch image. 
 
 ```shell
-export ELASTICSEARCH_IMAGE="${PLUGIN_IMAGE}"
+export ELASTICSEARCH_IMAGE="elasticsearch"
 export ELASTICSEARCH_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku elasticsearch:create lolipop
 ```
 
-You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form.
+You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form. 
 
 ```shell
 export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
@@ -169,7 +169,7 @@ flags:
 - `-a|--alias "BLUE_DATABASE"`: an alternative alias to use for linking to an app via environment variable
 - `-q|--querystring "pool=5"`: ampersand delimited querystring arguments to append to the service link
 
-A elasticsearch service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app.
+A elasticsearch service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app. 
 
 > NOTE: this will restart your app
 
@@ -200,14 +200,14 @@ The host exposed here only works internally in docker containers. If you want yo
 dokku elasticsearch:link other_service playground
 ```
 
-It is possible to change the protocol for elasticsearch_url by setting the environment variable elasticsearch_database_scheme on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding.
+It is possible to change the protocol for `ELASTICSEARCH_URL` by setting the environment variable `ELASTICSEARCH_DATABASE_SCHEME` on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding. 
 
 ```shell
 dokku config:set playground ELASTICSEARCH_DATABASE_SCHEME=http2
 dokku elasticsearch:link lolipop playground
 ```
 
-This will cause elasticsearch_url to be set as:
+This will cause `ELASTICSEARCH_URL` to be set as:
 
 ```
 http2://lolipop:SOME_PASSWORD@dokku-elasticsearch-lolipop:9200/lolipop
@@ -239,13 +239,13 @@ The lifecycle of each service can be managed through the following commands:
 dokku elasticsearch:enter <service>
 ```
 
-A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
+A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk. 
 
 ```shell
 dokku elasticsearch:enter lolipop
 ```
 
-You may also run a command directly against the service. Filesystem changes will not be saved to disk.
+You may also run a command directly against the service. Filesystem changes will not be saved to disk. 
 
 ```shell
 dokku elasticsearch:enter lolipop touch /tmp/test
@@ -258,10 +258,10 @@ dokku elasticsearch:enter lolipop touch /tmp/test
 dokku elasticsearch:expose <service> <ports...>
 ```
 
-Expose the service on the service's normal ports, allowing access to it from the public interface (0. 0. 0. 0):
+Expose the service on the service's normal ports, allowing access to it from the public interface (`0.0.0.0`):
 
 ```shell
-dokku elasticsearch:expose lolipop ${PLUGIN_DATASTORE_PORTS[@]}
+dokku elasticsearch:expose lolipop 9200 9300
 ```
 
 ### unexpose a previously exposed elasticsearch service
@@ -271,7 +271,7 @@ dokku elasticsearch:expose lolipop ${PLUGIN_DATASTORE_PORTS[@]}
 dokku elasticsearch:unexpose <service>
 ```
 
-Unexpose the service, removing access to it from the public interface (0. 0. 0. 0):
+Unexpose the service, removing access to it from the public interface (`0.0.0.0`):
 
 ```shell
 dokku elasticsearch:unexpose lolipop
@@ -298,7 +298,7 @@ You can promote the new service to be the primary one:
 dokku elasticsearch:promote other_service playground
 ```
 
-This will replace elasticsearch_url with the url from other_service and generate another environment variable to hold the previous value if necessary. You could end up with the following for example:
+This will replace `ELASTICSEARCH_URL` with the url from other_service and generate another environment variable to hold the previous value if necessary. You could end up with the following for example:
 
 ```
 ELASTICSEARCH_URL=http://other_service:ANOTHER_PASSWORD@dokku-elasticsearch-other-service:9200/other_service
@@ -376,7 +376,7 @@ Service scripting can be executed using the following commands:
 dokku elasticsearch:app-links <app>
 ```
 
-List all elasticsearch services that are linked to the 'playground' app.
+List all elasticsearch services that are linked to the 'playground' app. 
 
 ```shell
 dokku elasticsearch:app-links playground
@@ -389,7 +389,7 @@ dokku elasticsearch:app-links playground
 dokku elasticsearch:exists <service>
 ```
 
-Here we check if the lolipop elasticsearch service exists.
+Here we check if the lolipop elasticsearch service exists. 
 
 ```shell
 dokku elasticsearch:exists lolipop
@@ -402,7 +402,7 @@ dokku elasticsearch:exists lolipop
 dokku elasticsearch:linked <service> <app>
 ```
 
-Here we check if the lolipop elasticsearch service is linked to the 'playground' app.
+Here we check if the lolipop elasticsearch service is linked to the 'playground' app. 
 
 ```shell
 dokku elasticsearch:linked lolipop playground
@@ -415,7 +415,7 @@ dokku elasticsearch:linked lolipop playground
 dokku elasticsearch:links <service>
 ```
 
-List all apps linked to the 'lolipop' elasticsearch service.
+List all apps linked to the 'lolipop' elasticsearch service. 
 
 ```shell
 dokku elasticsearch:links lolipop
