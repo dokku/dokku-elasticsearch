@@ -21,6 +21,7 @@ export PLUGIN_SCHEME="http"
 export PLUGIN_SERVICE="Elasticsearch"
 export PLUGIN_VARIABLE="ELASTICSEARCH"
 export PLUGIN_BASE_PATH="$PLUGIN_PATH"
+export PLUGIN_CONFIG_SUFFIX="config"
 if [[ -n $DOKKU_API_VERSION ]]; then
   export PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
 fi
