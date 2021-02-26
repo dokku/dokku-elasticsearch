@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-_DIR="$(dirname $0)"
-export ELASTICSEARCH_IMAGE=${ELASTICSEARCH_IMAGE:="$(awk -F '[ :]' '{print $2}' $_DIR/Dockerfile)"}
-export ELASTICSEARCH_IMAGE_VERSION=${ELASTICSEARCH_IMAGE_VERSION:="$(awk -F '[ :]' '{print $3}' $_DIR/Dockerfile)"}
+_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export ELASTICSEARCH_IMAGE=${ELASTICSEARCH_IMAGE:="$(awk -F '[ :]' '{print $2}' "${_DIR}/Dockerfile")"}
+export ELASTICSEARCH_IMAGE_VERSION=${ELASTICSEARCH_IMAGE_VERSION:="$(awk -F '[ :]' '{print $3}' "${_DIR}/Dockerfile")"}
 export ELASTICSEARCH_ROOT=${ELASTICSEARCH_ROOT:="$DOKKU_LIB_ROOT/services/elasticsearch"}
 export ELASTICSEARCH_HOST_ROOT=${ELASTICSEARCH_HOST_ROOT:=$ELASTICSEARCH_ROOT}
 
