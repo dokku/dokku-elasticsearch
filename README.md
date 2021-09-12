@@ -22,7 +22,7 @@ elasticsearch:create <service> [--create-flags...] # create a elasticsearch serv
 elasticsearch:destroy <service> [-f|--force]       # delete the elasticsearch service/data/container if there are no links left
 elasticsearch:enter <service>                      # enter or run a command in a running elasticsearch service container
 elasticsearch:exists <service>                     # check if the elasticsearch service exists
-elasticsearch:expose <service> <ports...>          # expose a elasticsearch service on custom port if provided (random port otherwise)
+elasticsearch:expose <service> <ports...>          # expose a elasticsearch service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 elasticsearch:info <service> [--single-info-flag]  # print the service information
 elasticsearch:link <service> <app> [--link-flags...] # link the elasticsearch service to the app
 elasticsearch:linked <service> <app>               # check if the elasticsearch service is linked to an app
@@ -251,7 +251,7 @@ You may also run a command directly against the service. Filesystem changes will
 dokku elasticsearch:enter lolipop touch /tmp/test
 ```
 
-### expose a elasticsearch service on custom port if provided (random port otherwise)
+### expose a elasticsearch service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 
 ```shell
 # usage
@@ -262,6 +262,12 @@ Expose the service on the service's normal ports, allowing access to it from the
 
 ```shell
 dokku elasticsearch:expose lolipop 9200 9300
+```
+
+Expose the service on the service's normal ports, with the first on a specified ip adddress (127.0.0.1):
+
+```shell
+dokku elasticsearch:expose lolipop 127.0.0.1:9200 9300
 ```
 
 ### unexpose a previously exposed elasticsearch service
