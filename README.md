@@ -65,7 +65,7 @@ Create a elasticsearch service named lolipop:
 dokku elasticsearch:create lolipop
 ```
 
-You can also specify the image and image version to use for the service. It *must* be compatible with the elasticsearch image. 
+You can also specify the image and image version to use for the service. It *must* be compatible with the elasticsearch image.
 
 ```shell
 export ELASTICSEARCH_IMAGE="elasticsearch"
@@ -73,7 +73,7 @@ export ELASTICSEARCH_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku elasticsearch:create lolipop
 ```
 
-You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form. 
+You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form.
 
 ```shell
 export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
@@ -169,7 +169,7 @@ flags:
 - `-a|--alias "BLUE_DATABASE"`: an alternative alias to use for linking to an app via environment variable
 - `-q|--querystring "pool=5"`: ampersand delimited querystring arguments to append to the service link
 
-A elasticsearch service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app. 
+A elasticsearch service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our `playground` app.
 
 > NOTE: this will restart your app
 
@@ -194,13 +194,13 @@ The following will be set on the linked application by default:
 ELASTICSEARCH_URL=http://lolipop:SOME_PASSWORD@dokku-elasticsearch-lolipop:9200/lolipop
 ```
 
-The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the 'expose' subcommand. Another service can be linked to your app:
+The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
 
 ```shell
 dokku elasticsearch:link other_service playground
 ```
 
-It is possible to change the protocol for `ELASTICSEARCH_URL` by setting the environment variable `ELASTICSEARCH_DATABASE_SCHEME` on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding. 
+It is possible to change the protocol for `ELASTICSEARCH_URL` by setting the environment variable `ELASTICSEARCH_DATABASE_SCHEME` on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding.
 
 ```shell
 dokku config:set playground ELASTICSEARCH_DATABASE_SCHEME=http2
@@ -239,13 +239,13 @@ The lifecycle of each service can be managed through the following commands:
 dokku elasticsearch:enter <service>
 ```
 
-A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk. 
+A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
 
 ```shell
 dokku elasticsearch:enter lolipop
 ```
 
-You may also run a command directly against the service. Filesystem changes will not be saved to disk. 
+You may also run a command directly against the service. Filesystem changes will not be saved to disk.
 
 ```shell
 dokku elasticsearch:enter lolipop touch /tmp/test
@@ -376,7 +376,7 @@ Service scripting can be executed using the following commands:
 dokku elasticsearch:app-links <app>
 ```
 
-List all elasticsearch services that are linked to the 'playground' app. 
+List all elasticsearch services that are linked to the `playground` app.
 
 ```shell
 dokku elasticsearch:app-links playground
@@ -389,7 +389,7 @@ dokku elasticsearch:app-links playground
 dokku elasticsearch:exists <service>
 ```
 
-Here we check if the lolipop elasticsearch service exists. 
+Here we check if the lolipop elasticsearch service exists.
 
 ```shell
 dokku elasticsearch:exists lolipop
@@ -402,7 +402,7 @@ dokku elasticsearch:exists lolipop
 dokku elasticsearch:linked <service> <app>
 ```
 
-Here we check if the lolipop elasticsearch service is linked to the 'playground' app. 
+Here we check if the lolipop elasticsearch service is linked to the `playground` app.
 
 ```shell
 dokku elasticsearch:linked lolipop playground
@@ -415,7 +415,7 @@ dokku elasticsearch:linked lolipop playground
 dokku elasticsearch:links <service>
 ```
 
-List all apps linked to the 'lolipop' elasticsearch service. 
+List all apps linked to the `lolipop` elasticsearch service.
 
 ```shell
 dokku elasticsearch:links lolipop
