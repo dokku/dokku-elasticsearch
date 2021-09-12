@@ -56,6 +56,10 @@ service_create() {
     echo "" >"$SERVICE_ROOT/ENV"
   fi
 
+  if [[ -n "$SERVICE_MEMORY" ]]; then
+    echo "$SERVICE_MEMORY" >"$SERVICE_ROOT/SERVICE_MEMORY"
+  fi
+
   write_database_name "$SERVICE"
   plugn trigger service-action post-create "$SERVICE"
   service_create_container "$SERVICE"
@@ -70,8 +74,14 @@ service_create_container() {
 
   local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
 
+  [[ -f "$SERVICE_ROOT/SERVICE_MEMORY" ]] && SERVICE_MEMORY="$(cat "$SERVICE_ROOT/SERVICE_MEMORY")"
+  if [[ -n "$SERVICE_MEMORY" ]]; then
+    MEMORY_LIMIT="--memory=${SERVICE_MEMORY}m"
+  fi
+
   if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "2" ]]; then
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    # shellcheck disable=SC2086
+    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     echo "$ID" >"$SERVICE_ROOT/ID"
 
     dokku_log_info2 "Copying config files into place"
@@ -99,7 +109,8 @@ service_create_container() {
       fi
     fi
 
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    # shellcheck disable=SC2086
+    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     echo "$ID" >"$SERVICE_ROOT/ID"
 
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
