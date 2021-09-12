@@ -82,13 +82,22 @@ service_create_container() {
     retry-docker-command "$ID" "chown -R root:elasticsearch /etc/elasticsearch"
   else
     dokku_log_info2 "Extracting config files"
-    local TEMP_DOCKER_CONTAINER_ID=$(docker create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-    docker cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_HOST_ROOT/"
+    TEMP_DOCKER_CONTAINER_ID=$(docker create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+
+    docker cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" - | tar -x -C "$SERVICE_ROOT"
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-      docker cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX"
+      docker cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
     fi
-    docker rm -v "${TEMP_DOCKER_CONTAINER_ID}"
-    sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
+
+    docker rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
+    sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
+
+    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
+      if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
+        sed -i.bak 's#dokku#dokku#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+        sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" > "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+      fi
+    fi
 
     ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
     echo "$ID" >"$SERVICE_ROOT/ID"
