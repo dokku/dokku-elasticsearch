@@ -62,10 +62,10 @@ flags:
 - `-r|--root-password PASSWORD`: override the root-level service password
 - `-s|--shm-size SHM_SIZE`: override shared memory size for elasticsearch docker container
 
-Create a elasticsearch service named lolipop:
+Create a elasticsearch service named lollipop:
 
 ```shell
-dokku elasticsearch:create lolipop
+dokku elasticsearch:create lollipop
 ```
 
 You can also specify the image and image version to use for the service. It *must* be compatible with the elasticsearch image.
@@ -73,14 +73,14 @@ You can also specify the image and image version to use for the service. It *mus
 ```shell
 export ELASTICSEARCH_IMAGE="elasticsearch"
 export ELASTICSEARCH_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
-dokku elasticsearch:create lolipop
+dokku elasticsearch:create lollipop
 ```
 
 You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form.
 
 ```shell
 export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
-dokku elasticsearch:create lolipop
+dokku elasticsearch:create lollipop
 ```
 
 ### print the service information
@@ -106,22 +106,22 @@ flags:
 Get connection information as follows:
 
 ```shell
-dokku elasticsearch:info lolipop
+dokku elasticsearch:info lollipop
 ```
 
 You can also retrieve a specific piece of service info via flags:
 
 ```shell
-dokku elasticsearch:info lolipop --config-dir
-dokku elasticsearch:info lolipop --data-dir
-dokku elasticsearch:info lolipop --dsn
-dokku elasticsearch:info lolipop --exposed-ports
-dokku elasticsearch:info lolipop --id
-dokku elasticsearch:info lolipop --internal-ip
-dokku elasticsearch:info lolipop --links
-dokku elasticsearch:info lolipop --service-root
-dokku elasticsearch:info lolipop --status
-dokku elasticsearch:info lolipop --version
+dokku elasticsearch:info lollipop --config-dir
+dokku elasticsearch:info lollipop --data-dir
+dokku elasticsearch:info lollipop --dsn
+dokku elasticsearch:info lollipop --exposed-ports
+dokku elasticsearch:info lollipop --id
+dokku elasticsearch:info lollipop --internal-ip
+dokku elasticsearch:info lollipop --links
+dokku elasticsearch:info lollipop --service-root
+dokku elasticsearch:info lollipop --status
+dokku elasticsearch:info lollipop --version
 ```
 
 ### list all elasticsearch services
@@ -151,13 +151,13 @@ flags:
 You can tail logs for a particular service:
 
 ```shell
-dokku elasticsearch:logs lolipop
+dokku elasticsearch:logs lollipop
 ```
 
 By default, logs will not be tailed, but you can do this with the --tail flag:
 
 ```shell
-dokku elasticsearch:logs lolipop --tail
+dokku elasticsearch:logs lollipop --tail
 ```
 
 ### link the elasticsearch service to the app
@@ -177,24 +177,24 @@ A elasticsearch service can be linked to a container. This will use native docke
 > NOTE: this will restart your app
 
 ```shell
-dokku elasticsearch:link lolipop playground
+dokku elasticsearch:link lollipop playground
 ```
 
 The following environment variables will be set automatically by docker (not on the app itself, so they won’t be listed when calling dokku config):
 
 ```
-DOKKU_ELASTICSEARCH_LOLIPOP_NAME=/lolipop/DATABASE
-DOKKU_ELASTICSEARCH_LOLIPOP_PORT=tcp://172.17.0.1:9200
-DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP=tcp://172.17.0.1:9200
-DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP_PROTO=tcp
-DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP_PORT=9200
-DOKKU_ELASTICSEARCH_LOLIPOP_PORT_9200_TCP_ADDR=172.17.0.1
+DOKKU_ELASTICSEARCH_LOLLIPOP_NAME=/lollipop/DATABASE
+DOKKU_ELASTICSEARCH_LOLLIPOP_PORT=tcp://172.17.0.1:9200
+DOKKU_ELASTICSEARCH_LOLLIPOP_PORT_9200_TCP=tcp://172.17.0.1:9200
+DOKKU_ELASTICSEARCH_LOLLIPOP_PORT_9200_TCP_PROTO=tcp
+DOKKU_ELASTICSEARCH_LOLLIPOP_PORT_9200_TCP_PORT=9200
+DOKKU_ELASTICSEARCH_LOLLIPOP_PORT_9200_TCP_ADDR=172.17.0.1
 ```
 
 The following will be set on the linked application by default:
 
 ```
-ELASTICSEARCH_URL=http://dokku-elasticsearch-lolipop:9200
+ELASTICSEARCH_URL=http://dokku-elasticsearch-lollipop:9200
 ```
 
 The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
@@ -207,13 +207,13 @@ It is possible to change the protocol for `ELASTICSEARCH_URL` by setting the env
 
 ```shell
 dokku config:set playground ELASTICSEARCH_DATABASE_SCHEME=http2
-dokku elasticsearch:link lolipop playground
+dokku elasticsearch:link lollipop playground
 ```
 
 This will cause `ELASTICSEARCH_URL` to be set as:
 
 ```
-http2://dokku-elasticsearch-lolipop:9200
+http2://dokku-elasticsearch-lollipop:9200
 ```
 
 ### unlink the elasticsearch service from the app
@@ -228,7 +228,7 @@ You can unlink a elasticsearch service:
 > NOTE: this will restart your app and unset related environment variables
 
 ```shell
-dokku elasticsearch:unlink lolipop playground
+dokku elasticsearch:unlink lollipop playground
 ```
 
 ### Service Lifecycle
@@ -245,13 +245,13 @@ dokku elasticsearch:enter <service>
 A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
 
 ```shell
-dokku elasticsearch:enter lolipop
+dokku elasticsearch:enter lollipop
 ```
 
 You may also run a command directly against the service. Filesystem changes will not be saved to disk.
 
 ```shell
-dokku elasticsearch:enter lolipop touch /tmp/test
+dokku elasticsearch:enter lollipop touch /tmp/test
 ```
 
 ### expose a elasticsearch service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
@@ -264,13 +264,13 @@ dokku elasticsearch:expose <service> <ports...>
 Expose the service on the service's normal ports, allowing access to it from the public interface (`0.0.0.0`):
 
 ```shell
-dokku elasticsearch:expose lolipop 9200 9300
+dokku elasticsearch:expose lollipop 9200 9300
 ```
 
 Expose the service on the service's normal ports, with the first on a specified ip adddress (127.0.0.1):
 
 ```shell
-dokku elasticsearch:expose lolipop 127.0.0.1:9200 9300
+dokku elasticsearch:expose lollipop 127.0.0.1:9200 9300
 ```
 
 ### unexpose a previously exposed elasticsearch service
@@ -283,7 +283,7 @@ dokku elasticsearch:unexpose <service>
 Unexpose the service, removing access to it from the public interface (`0.0.0.0`):
 
 ```shell
-dokku elasticsearch:unexpose lolipop
+dokku elasticsearch:unexpose lollipop
 ```
 
 ### promote service <service> as ELASTICSEARCH_URL in <app>
@@ -312,7 +312,7 @@ This will replace `ELASTICSEARCH_URL` with the url from other_service and genera
 ```
 ELASTICSEARCH_URL=http://other_service:ANOTHER_PASSWORD@dokku-elasticsearch-other-service:9200/other_service
 DOKKU_ELASTICSEARCH_BLUE_URL=http://other_service:ANOTHER_PASSWORD@dokku-elasticsearch-other-service:9200/other_service
-DOKKU_ELASTICSEARCH_SILVER_URL=http://lolipop:SOME_PASSWORD@dokku-elasticsearch-lolipop:9200/lolipop
+DOKKU_ELASTICSEARCH_SILVER_URL=http://lollipop:SOME_PASSWORD@dokku-elasticsearch-lollipop:9200/lollipop
 ```
 
 ### start a previously stopped elasticsearch service
@@ -325,7 +325,7 @@ dokku elasticsearch:start <service>
 Start the service:
 
 ```shell
-dokku elasticsearch:start lolipop
+dokku elasticsearch:start lollipop
 ```
 
 ### stop a running elasticsearch service
@@ -338,7 +338,7 @@ dokku elasticsearch:stop <service>
 Stop the service and the running container:
 
 ```shell
-dokku elasticsearch:stop lolipop
+dokku elasticsearch:stop lollipop
 ```
 
 ### graceful shutdown and restart of the elasticsearch service container
@@ -351,7 +351,7 @@ dokku elasticsearch:restart <service>
 Restart the service:
 
 ```shell
-dokku elasticsearch:restart lolipop
+dokku elasticsearch:restart lollipop
 ```
 
 ### upgrade service <service> to the specified versions
@@ -373,7 +373,7 @@ flags:
 You can upgrade an existing service to a new image or image-version:
 
 ```shell
-dokku elasticsearch:upgrade lolipop
+dokku elasticsearch:upgrade lollipop
 ```
 
 ### Service Automation
@@ -400,10 +400,10 @@ dokku elasticsearch:app-links playground
 dokku elasticsearch:exists <service>
 ```
 
-Here we check if the lolipop elasticsearch service exists.
+Here we check if the lollipop elasticsearch service exists.
 
 ```shell
-dokku elasticsearch:exists lolipop
+dokku elasticsearch:exists lollipop
 ```
 
 ### check if the elasticsearch service is linked to an app
@@ -413,10 +413,10 @@ dokku elasticsearch:exists lolipop
 dokku elasticsearch:linked <service> <app>
 ```
 
-Here we check if the lolipop elasticsearch service is linked to the `playground` app.
+Here we check if the lollipop elasticsearch service is linked to the `playground` app.
 
 ```shell
-dokku elasticsearch:linked lolipop playground
+dokku elasticsearch:linked lollipop playground
 ```
 
 ### list all apps linked to the elasticsearch service
@@ -426,10 +426,10 @@ dokku elasticsearch:linked lolipop playground
 dokku elasticsearch:links <service>
 ```
 
-List all apps linked to the `lolipop` elasticsearch service.
+List all apps linked to the `lollipop` elasticsearch service.
 
 ```shell
-dokku elasticsearch:links lolipop
+dokku elasticsearch:links lollipop
 ```
 
 ### Disabling `docker pull` calls
