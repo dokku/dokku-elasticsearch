@@ -49,17 +49,7 @@ service_create() {
   mkdir -p "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX" || dokku_log_fail "Unable to create service config directory"
   touch "$LINKS_FILE"
 
-  [[ -n "$SERVICE_CUSTOM_ENV" ]] && ELASTICSEARCH_CUSTOM_ENV="$SERVICE_CUSTOM_ENV"
-  if [[ -n $ELASTICSEARCH_CUSTOM_ENV ]]; then
-    echo "$ELASTICSEARCH_CUSTOM_ENV" | tr ';' "\n" >"$SERVICE_ROOT/ENV"
-  else
-    echo "" >"$SERVICE_ROOT/ENV"
-  fi
-
-  if [[ -n "$SERVICE_MEMORY" ]]; then
-    echo "$SERVICE_MEMORY" >"$SERVICE_ROOT/SERVICE_MEMORY"
-  fi
-
+  service_commit_config "$SERVICE"
   write_database_name "$SERVICE"
   plugn trigger service-action post-create "$SERVICE"
   service_create_container "$SERVICE"
@@ -74,6 +64,10 @@ service_create_container() {
 
   local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
 
+  if [[ -f "$SERVICE_ROOT/CONFIG_OPTIONS" ]]; then
+    export CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/CONFIG_OPTIONS")"
+  fi
+
   [[ -f "$SERVICE_ROOT/SERVICE_MEMORY" ]] && SERVICE_MEMORY="$(cat "$SERVICE_ROOT/SERVICE_MEMORY")"
   if [[ -n "$SERVICE_MEMORY" ]]; then
     MEMORY_LIMIT="--memory=${SERVICE_MEMORY}m"
@@ -81,7 +75,7 @@ service_create_container() {
 
   if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "2" ]]; then
     # shellcheck disable=SC2086
-    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
     echo "$ID" >"$SERVICE_ROOT/ID"
 
     dokku_log_info2 "Copying config files into place"
@@ -110,7 +104,7 @@ service_create_container() {
     fi
 
     # shellcheck disable=SC2086
-    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
     echo "$ID" >"$SERVICE_ROOT/ID"
 
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
