@@ -96,7 +96,7 @@ service_create_container() {
     dokku_log_info2 "Extracting config files"
     TEMP_DOCKER_CONTAINER_ID=$(docker create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
 
-    docker cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" - | tar -x -C "$SERVICE_ROOT"
+    docker cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
       docker cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
     fi
