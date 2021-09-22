@@ -107,7 +107,7 @@ service_create_container() {
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
       if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
         sed -i.bak 's#dokku#dokku#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-        sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" > "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+        sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" > "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
       fi
     fi
 
