@@ -1,4 +1,5 @@
 node.name: {{ $.SERVICE_NAME }}-1
+node.master: true
 cluster.name: {{ $.SERVICE_NAME }}-cluster
 network.host: 0.0.0.0
 cluster.initial_master_nodes:
