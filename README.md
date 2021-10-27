@@ -28,7 +28,7 @@ elasticsearch:link <service> <app> [--link-flags...] # link the elasticsearch se
 elasticsearch:linked <service> <app>               # check if the elasticsearch service is linked to an app
 elasticsearch:links <service>                      # list all apps linked to the elasticsearch service
 elasticsearch:list                                 # list all elasticsearch services
-elasticsearch:logs <service> [-t|--tail]           # print the most recent log(s) for this service
+elasticsearch:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
 elasticsearch:promote <service> <app>              # promote service <service> as ELASTICSEARCH_URL in <app>
 elasticsearch:restart <service>                    # graceful shutdown and restart of the elasticsearch service container
 elasticsearch:start <service>                      # start a previously stopped elasticsearch service
@@ -141,12 +141,12 @@ dokku elasticsearch:list
 
 ```shell
 # usage
-dokku elasticsearch:logs <service> [-t|--tail]
+dokku elasticsearch:logs <service> [-t|--tail] <tail-num-optional>
 ```
 
 flags:
 
-- `-t|--tail`: do not stop when end of the logs are reached and wait for additional output
+- `-t|--tail [<tail-num>]`: do not stop when end of the logs are reached and wait for additional output
 
 You can tail logs for a particular service:
 
@@ -158,6 +158,12 @@ By default, logs will not be tailed, but you can do this with the --tail flag:
 
 ```shell
 dokku elasticsearch:logs lollipop --tail
+```
+
+The default tail setting is to show all logs, but an initial count can also be specified:
+
+```shell
+dokku elasticsearch:logs lollipop --tail 5
 ```
 
 ### link the elasticsearch service to the app
