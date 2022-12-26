@@ -29,6 +29,7 @@ elasticsearch:linked <service> <app>               # check if the elasticsearch 
 elasticsearch:links <service>                      # list all apps linked to the elasticsearch service
 elasticsearch:list                                 # list all elasticsearch services
 elasticsearch:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
+elasticsearch:pause <service>                      # pause a running elasticsearch service
 elasticsearch:promote <service> <app>              # promote service <service> as ELASTICSEARCH_URL in <app>
 elasticsearch:restart <service>                    # graceful shutdown and restart of the elasticsearch service container
 elasticsearch:start <service>                      # start a previously stopped elasticsearch service
@@ -343,10 +344,23 @@ dokku elasticsearch:start lollipop
 dokku elasticsearch:stop <service>
 ```
 
-Stop the service and the running container:
+Stop the service and removes the running container:
 
 ```shell
 dokku elasticsearch:stop lollipop
+```
+
+### pause a running elasticsearch service
+
+```shell
+# usage
+dokku elasticsearch:pause <service>
+```
+
+Pause the running container for the service:
+
+```shell
+dokku elasticsearch:pause lollipop
 ```
 
 ### graceful shutdown and restart of the elasticsearch service container
