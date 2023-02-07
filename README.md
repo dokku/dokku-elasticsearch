@@ -100,7 +100,10 @@ flags:
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
 - `--internal-ip`: show the service internal ip
+- `--initial-network`: show the initial network being connected to
 - `--links`: show the service app links
+- `--post-create-network`: show the networks to attach to after service container creation
+- `--post-start-network`: show the networks to attach to after service container start
 - `--service-root`: show the service root directory
 - `--status`: show the service running status
 - `--version`: show the service image version
@@ -120,7 +123,10 @@ dokku elasticsearch:info lollipop --dsn
 dokku elasticsearch:info lollipop --exposed-ports
 dokku elasticsearch:info lollipop --id
 dokku elasticsearch:info lollipop --internal-ip
+dokku elasticsearch:info lollipop --initial-network
 dokku elasticsearch:info lollipop --links
+dokku elasticsearch:info lollipop --post-create-network
+dokku elasticsearch:info lollipop --post-start-network
 dokku elasticsearch:info lollipop --service-root
 dokku elasticsearch:info lollipop --status
 dokku elasticsearch:info lollipop --version
