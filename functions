@@ -36,11 +36,11 @@ service_create() {
   if ! service_image_exists "$SERVICE"; then
     if [[ "$PLUGIN_DISABLE_PULL" == "true" ]]; then
       dokku_log_warn "${PLUGIN_DISABLE_PULL_VARIABLE} environment variable detected. Not running pull command." 1>&2
-      dokku_log_warn "   docker pull ${IMAGE}" 1>&2
+      dokku_log_warn "   docker image pull ${IMAGE}" 1>&2
       dokku_log_warn "$PLUGIN_SERVICE service creation failed"
       exit 1
     fi
-    docker pull "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" || dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION pull failed"
+    "$DOCKER_BIN" image pull "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" || dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION pull failed"
   fi
 
   plugn trigger service-action pre-create "$PLUGIN_COMMAND_PREFIX" "$SERVICE"
@@ -83,7 +83,7 @@ service_create_container() {
 
   if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "2" ]]; then
     # shellcheck disable=SC2086
-    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
+    ID=$("$DOCKER_BIN" container run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
     echo "$ID" >"$SERVICE_ROOT/ID"
 
     dokku_log_info2 "Copying config files into place"
@@ -94,14 +94,14 @@ service_create_container() {
     retry-docker-command "$ID" "chown -R root:elasticsearch /etc/elasticsearch"
   else
     dokku_log_info2 "Extracting config files"
-    TEMP_DOCKER_CONTAINER_ID=$(docker create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+    TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
 
-    docker cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
+    "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-      docker cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
+      "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
     fi
 
-    docker rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
+    "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
     sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
 
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
@@ -112,7 +112,7 @@ service_create_container() {
     fi
 
     # shellcheck disable=SC2086
-    ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
+    ID=$("$DOCKER_BIN" container run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
     echo "$ID" >"$SERVICE_ROOT/ID"
 
     if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
@@ -122,10 +122,10 @@ service_create_container() {
     retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
   fi
 
-  docker restart "$ID" >/dev/null
+  "$DOCKER_BIN" container restart "$ID" >/dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
-  docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" "$PLUGIN_WAIT_IMAGE" -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
+  "$DOCKER_BIN" container run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" "$PLUGIN_WAIT_IMAGE" -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
@@ -161,7 +161,7 @@ service_start() {
   local QUIET="$2"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
-  local ID=$(docker ps -aq --no-trunc --filter "status=running" --filter "name=^/$SERVICE_NAME$" --format '{{ .ID }}') || true
+  local ID=$("$DOCKER_BIN" container ps -aq --no-trunc --filter "status=running" --filter "name=^/$SERVICE_NAME$" --format '{{ .ID }}') || true
   if [[ -n $ID ]]; then
     [[ -z $QUIET ]] && dokku_log_warn "Service is already started"
     if [[ ! -f "$SERVICE_ROOT/ID" ]] || [[ "$(cat "$SERVICE_ROOT/ID")" != "$ID" ]]; then
@@ -172,10 +172,10 @@ service_start() {
   fi
 
   dokku_log_info2_quiet "Starting container"
-  local PREVIOUS_ID=$(docker ps -aq --no-trunc --filter "status=exited" --filter "name=^/$SERVICE_NAME$" --format '{{ .ID }}') || true
+  local PREVIOUS_ID=$("$DOCKER_BIN" container ps -aq --no-trunc --filter "status=exited" --filter "name=^/$SERVICE_NAME$" --format '{{ .ID }}') || true
 
   if [[ -n $PREVIOUS_ID ]]; then
-    docker start "$PREVIOUS_ID" >/dev/null
+    "$DOCKER_BIN" container start "$PREVIOUS_ID" >/dev/null
     service_port_unpause "$SERVICE"
     dokku_log_info2 "Container started"
   elif service_image_exists "$SERVICE"; then
