@@ -81,46 +81,33 @@ service_create_container() {
   [[ -f "$SERVICE_ROOT/IMAGE" ]] && PLUGIN_IMAGE="$(cat "$SERVICE_ROOT/IMAGE")"
   [[ -f "$SERVICE_ROOT/IMAGE_VERSION" ]] && PLUGIN_IMAGE_VERSION="$(cat "$SERVICE_ROOT/IMAGE_VERSION")"
 
-  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "2" ]]; then
-    # shellcheck disable=SC2086
-    ID=$("$DOCKER_BIN" container run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
-    echo "$ID" >"$SERVICE_ROOT/ID"
+  dokku_log_info2 "Extracting config files"
+  TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
 
-    dokku_log_info2 "Copying config files into place"
-    retry-docker-command "$ID" "cp -arfp --no-clobber /etc/elasticsearch/. /usr/share/elasticsearch/config/"
-    retry-docker-command "$ID" "echo 'network.host: 0.0.0.0' >> /usr/share/elasticsearch/config/elasticsearch.yml"
-    retry-docker-command "$ID" "test -f /usr/share/elasticsearch/config/jvm.options && sed -i.bak 's#Xms2g#Xms512m#g; s#Xmx2g#Xmx512m#g'; true"
-    retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
-    retry-docker-command "$ID" "chown -R root:elasticsearch /etc/elasticsearch"
-  else
-    dokku_log_info2 "Extracting config files"
-    TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-
-    "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
-    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-      "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
-    fi
-
-    "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
-    sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
-
-    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
-      if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
-        sed -i.bak 's#dokku#dokku#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-        sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" >"$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-      fi
-    fi
-
-    # shellcheck disable=SC2086
-    ID=$("$DOCKER_BIN" container run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
-    echo "$ID" >"$SERVICE_ROOT/ID"
-
-    if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-      retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
-    fi
-
-    retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
+  "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
+    "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
   fi
+
+  "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
+  sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
+
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
+    if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
+      sed -i.bak 's#dokku#dokku#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+      sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" >"$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+    fi
+  fi
+
+  # shellcheck disable=SC2086
+  ID=$("$DOCKER_BIN" container run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" -v "$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=elasticsearch "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
+  echo "$ID" >"$SERVICE_ROOT/ID"
+
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
+    retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
+  fi
+
+  retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
 
   "$DOCKER_BIN" container restart "$ID" >/dev/null
 
