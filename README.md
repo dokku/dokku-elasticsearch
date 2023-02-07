@@ -32,6 +32,7 @@ elasticsearch:logs <service> [-t|--tail] <tail-num-optional> # print the most re
 elasticsearch:pause <service>                      # pause a running elasticsearch service
 elasticsearch:promote <service> <app>              # promote service <service> as ELASTICSEARCH_URL in <app>
 elasticsearch:restart <service>                    # graceful shutdown and restart of the elasticsearch service container
+elasticsearch:set <service> <key> <value>          # set or clear a property for a service
 elasticsearch:start <service>                      # start a previously stopped elasticsearch service
 elasticsearch:stop <service>                       # stop a running elasticsearch service
 elasticsearch:unexpose <service>                   # unexpose a previously exposed elasticsearch service
@@ -236,6 +237,25 @@ You can unlink a elasticsearch service:
 
 ```shell
 dokku elasticsearch:unlink lollipop playground
+```
+
+### set or clear a property for a service
+
+```shell
+# usage
+dokku elasticsearch:set <service> <key> <value>
+```
+
+Set the network to attach after the service container is started:
+
+```shell
+dokku elasticsearch:set lollipop post-create-network custom-network
+```
+
+Unset the post-create-network value:
+
+```shell
+dokku elasticsearch:set lollipop post-create-network
 ```
 
 ### Service Lifecycle
