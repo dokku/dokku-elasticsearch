@@ -69,9 +69,10 @@ service_create_container() {
     export CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/CONFIG_OPTIONS")"
   fi
 
+  rm -f "$SERVICE_ROOT/ID"
   declare -a DOCKER_ARGS
   DOCKER_ARGS=()
-  DOCKER_ARGS+=("--detach")
+  DOCKER_ARGS+=("--cidfile=$SERVICE_ROOT/ID")
   DOCKER_ARGS+=("--env-file=$SERVICE_ROOT/ENV")
   DOCKER_ARGS+=("--hostname=$SERVICE")
   DOCKER_ARGS+=("--label=dokku.service=$PLUGIN_COMMAND_PREFIX")
@@ -126,16 +127,16 @@ service_create_container() {
   fi
 
   # shellcheck disable=SC2086
-  ID=$("$DOCKER_BIN" container run "${DOCKER_ARGS[@]}" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS)
-  echo "$ID" >"$SERVICE_ROOT/ID"
+  "$DOCKER_BIN" container create "${DOCKER_ARGS[@]}" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS >/dev/null
+  "$DOCKER_BIN" container start "$(cat "$SERVICE_ROOT/ID")" >/dev/null
 
   if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-    retry-docker-command "$ID" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
+    retry-docker-command "$(cat "$SERVICE_ROOT/ID")" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
   fi
 
-  retry-docker-command "$ID" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
+  retry-docker-command "$(cat "$SERVICE_ROOT/ID")" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
 
-  "$DOCKER_BIN" container restart "$ID" >/dev/null
+  "$DOCKER_BIN" container restart "$(cat "$SERVICE_ROOT/ID")" >/dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
   "$DOCKER_BIN" container run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" "$PLUGIN_WAIT_IMAGE" -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
