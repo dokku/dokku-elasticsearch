@@ -29,10 +29,7 @@ service_create() {
   service_parse_args "${@:2}"
 
   local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
-
-  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ne "2" ]]; then
-    service_check_sysctl
-  fi
+  service_check_sysctl
 
   if ! service_image_exists "$SERVICE"; then
     if [[ "$PLUGIN_DISABLE_PULL" == "true" ]]; then
@@ -112,10 +109,6 @@ service_create_container() {
   TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
 
   "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
-  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-    "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/etc/elasticsearch/jvm.options" - | tar -x -C "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX"
-  fi
-
   "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
   sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
 
@@ -143,10 +136,6 @@ service_create_container() {
       dokku_log_verbose_quiet "- $line"
       "$DOCKER_BIN" network connect --alias "$SERVICE_NAME" "$line" "$SERVICE_NAME"
     done < <(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "post-start-network" | tr "," "\n")
-  fi
-
-  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -eq "5" ]]; then
-    retry-docker-command "$(cat "$SERVICE_ROOT/ID")" "rm -rf /etc/elasticsearch && ln -sfn /usr/share/elasticsearch/config /etc/elasticsearch"
   fi
 
   retry-docker-command "$(cat "$SERVICE_ROOT/ID")" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
