@@ -32,6 +32,7 @@ elasticsearch:logs <service> [-t|--tail] <tail-num-optional> # print the most re
 elasticsearch:pause <service>                      # pause a running elasticsearch service
 elasticsearch:promote <service> <app>              # promote service <service> as ELASTICSEARCH_URL in <app>
 elasticsearch:restart <service>                    # graceful shutdown and restart of the elasticsearch service container
+elasticsearch:set <service> <key> <value>          # set or clear a property for a service
 elasticsearch:start <service>                      # start a previously stopped elasticsearch service
 elasticsearch:stop <service>                       # stop a running elasticsearch service
 elasticsearch:unexpose <service>                   # unexpose a previously exposed elasticsearch service
@@ -99,7 +100,10 @@ flags:
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
 - `--internal-ip`: show the service internal ip
+- `--initial-network`: show the initial network being connected to
 - `--links`: show the service app links
+- `--post-create-network`: show the networks to attach to after service container creation
+- `--post-start-network`: show the networks to attach to after service container start
 - `--service-root`: show the service root directory
 - `--status`: show the service running status
 - `--version`: show the service image version
@@ -119,7 +123,10 @@ dokku elasticsearch:info lollipop --dsn
 dokku elasticsearch:info lollipop --exposed-ports
 dokku elasticsearch:info lollipop --id
 dokku elasticsearch:info lollipop --internal-ip
+dokku elasticsearch:info lollipop --initial-network
 dokku elasticsearch:info lollipop --links
+dokku elasticsearch:info lollipop --post-create-network
+dokku elasticsearch:info lollipop --post-start-network
 dokku elasticsearch:info lollipop --service-root
 dokku elasticsearch:info lollipop --status
 dokku elasticsearch:info lollipop --version
@@ -236,6 +243,31 @@ You can unlink a elasticsearch service:
 
 ```shell
 dokku elasticsearch:unlink lollipop playground
+```
+
+### set or clear a property for a service
+
+```shell
+# usage
+dokku elasticsearch:set <service> <key> <value>
+```
+
+Set the network to attach after the service container is started:
+
+```shell
+dokku elasticsearch:set lollipop post-create-network custom-network
+```
+
+Set multiple networks:
+
+```shell
+dokku elasticsearch:set lollipop post-create-network custom-network,other-network
+```
+
+Unset the post-create-network value:
+
+```shell
+dokku elasticsearch:set lollipop post-create-network
 ```
 
 ### Service Lifecycle
