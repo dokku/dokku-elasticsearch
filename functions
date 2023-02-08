@@ -3,8 +3,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common-functions"
-source "$PLUGIN_BASE_PATH/common/functions"
-source "$PLUGIN_BASE_PATH/common/property-functions"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/property-functions"
 source "$PLUGIN_AVAILABLE_PATH/config/functions"
 if [[ -f "$PLUGIN_AVAILABLE_PATH/docker-options/functions" ]]; then
   source "$PLUGIN_AVAILABLE_PATH/docker-options/functions"
@@ -28,7 +28,6 @@ service_create() {
 
   service_parse_args "${@:2}"
 
-  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
   service_check_sysctl
 
   if ! service_image_exists "$SERVICE"; then
@@ -46,6 +45,20 @@ service_create() {
   mkdir -p "$SERVICE_ROOT/data" || dokku_log_fail "Unable to create service data directory"
   mkdir -p "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX" || dokku_log_fail "Unable to create service config directory"
   touch "$LINKS_FILE"
+
+  dokku_log_info2 "Extracting config files"
+  TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+
+  "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
+  "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
+  sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
+
+  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
+    if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
+      sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" >"$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+    fi
+  fi
 
   service_commit_config "$SERVICE"
   write_database_name "$SERVICE"
@@ -105,20 +118,6 @@ service_create_container() {
     LINK_CONTAINER_DOCKER_ARGS+=("--network=${network}")
   fi
 
-  dokku_log_info2 "Extracting config files"
-  TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-
-  "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
-  "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
-  sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
-
-  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
-    if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
-      sed -i.bak 's#dokku#dokku#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-      sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" >"$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-    fi
-  fi
-
   # shellcheck disable=SC2086
   suppress_output "$DOCKER_BIN" container create "${DOCKER_ARGS[@]}" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS
 
@@ -143,7 +142,12 @@ service_create_container() {
   "$DOCKER_BIN" container restart "$(cat "$SERVICE_ROOT/ID")" >/dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
-  "$DOCKER_BIN" container run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" "$PLUGIN_WAIT_IMAGE" -p "$PLUGIN_DATASTORE_WAIT_PORT" -t 60 >/dev/null
+  if ! suppress_output "$DOCKER_BIN" container run "${LINK_CONTAINER_DOCKER_ARGS[@]}" "$PLUGIN_WAIT_IMAGE" -c "$SERVICE_NAME:$PLUGIN_DATASTORE_WAIT_PORT" -t 60; then
+    dokku_log_info2_quiet "Start of $SERVICE container output"
+    dokku_container_log_verbose_quiet "$SERVICE_NAME"
+    dokku_log_info2_quiet "End of $SERVICE container output"
+    return 1
+  fi
 
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
