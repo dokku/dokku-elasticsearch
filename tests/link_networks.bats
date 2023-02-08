@@ -36,7 +36,7 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku --trace "$PLUGIN_COMMAND_PREFIX:start" ls
+  run dokku "$PLUGIN_COMMAND_PREFIX:start" ls
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -47,6 +47,14 @@ teardown() {
   assert_success
   assert_output_contains bridge 0
   assert_output_contains custom-network
+
+  run docker inspect dokku.$PLUGIN_COMMAND_PREFIX.ls -f '{{range $net,$v := .NetworkSettings.Networks}}{{range $k,$alias := $v.Aliases}}{{printf "alias:%s\n" $alias}}{{end}}{{end}}'
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "alias:dokku.$PLUGIN_COMMAND_PREFIX.ls"
+  assert_output_contains "alias:ls.$PLUGIN_COMMAND_PREFIX"
+  assert_output_contains "alias:ls"
 
   run dokku "$PLUGIN_COMMAND_PREFIX:set" ls initial-network
   echo "output: $output"
@@ -101,7 +109,7 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku --trace "$PLUGIN_COMMAND_PREFIX:start" ls
+  run dokku "$PLUGIN_COMMAND_PREFIX:start" ls
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -166,7 +174,7 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku --trace "$PLUGIN_COMMAND_PREFIX:start" ls
+  run dokku "$PLUGIN_COMMAND_PREFIX:start" ls
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -177,6 +185,14 @@ teardown() {
   assert_success
   assert_output_contains bridge
   assert_output_contains custom-network
+
+  run docker inspect dokku.$PLUGIN_COMMAND_PREFIX.ls -f '{{range $net,$v := .NetworkSettings.Networks}}{{range $k,$alias := $v.Aliases}}{{printf "alias:%s\n" $alias}}{{end}}{{end}}'
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "alias:dokku.$PLUGIN_COMMAND_PREFIX.ls"
+  assert_output_contains "alias:ls.$PLUGIN_COMMAND_PREFIX"
+  assert_output_contains "alias:ls"
 
   run dokku "$PLUGIN_COMMAND_PREFIX:set" ls post-start-network
   echo "output: $output"
@@ -236,6 +252,14 @@ teardown() {
   assert_success
   assert_output_contains bridge
   assert_output_contains custom-network
+
+  run docker inspect dokku.$PLUGIN_COMMAND_PREFIX.ls -f '{{range $net,$v := .NetworkSettings.Networks}}{{range $k,$alias := $v.Aliases}}{{printf "alias:%s\n" $alias}}{{end}}{{end}}'
+  echo "output: $output"
+  echo "status: $status"
+  assert_success
+  assert_output_contains "alias:dokku.$PLUGIN_COMMAND_PREFIX.ls"
+  assert_output_contains "alias:ls.$PLUGIN_COMMAND_PREFIX"
+  assert_output_contains "alias:ls"
 
   run dokku "$PLUGIN_COMMAND_PREFIX:destroy" lsa --force
   echo "output: $output"
