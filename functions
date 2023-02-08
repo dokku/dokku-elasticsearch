@@ -28,7 +28,6 @@ service_create() {
 
   service_parse_args "${@:2}"
 
-  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
   service_check_sysctl
 
   if ! service_image_exists "$SERVICE"; then
@@ -46,6 +45,20 @@ service_create() {
   mkdir -p "$SERVICE_ROOT/data" || dokku_log_fail "Unable to create service data directory"
   mkdir -p "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX" || dokku_log_fail "Unable to create service config directory"
   touch "$LINKS_FILE"
+
+  dokku_log_info2 "Extracting config files"
+  TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
+
+  "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
+  "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
+  sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
+
+  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
+    if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
+      sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" >"$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
+    fi
+  fi
 
   service_commit_config "$SERVICE"
   write_database_name "$SERVICE"
@@ -103,20 +116,6 @@ service_create_container() {
     DOCKER_ARGS+=("--network=${network}")
     DOCKER_ARGS+=("--network-alias=$SERVICE_NAME")
     LINK_CONTAINER_DOCKER_ARGS+=("--network=${network}")
-  fi
-
-  dokku_log_info2 "Extracting config files"
-  TEMP_DOCKER_CONTAINER_ID=$("$DOCKER_BIN" container create "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION")
-
-  "$DOCKER_BIN" container cp "${TEMP_DOCKER_CONTAINER_ID}:/usr/share/elasticsearch/config/" "$SERVICE_ROOT/"
-  "$DOCKER_BIN" container rm -v "${TEMP_DOCKER_CONTAINER_ID}" >/dev/null
-  sed -i.bak 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/jvm.options"
-
-  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -ge "7" ]]; then
-    if ! grep -q "initial_master_nodes" "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml" >/dev/null; then
-      sed -i.bak 's#dokku#dokku#g' "$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-      sigil -f "$PLUGIN_BASE_PATH/$PLUGIN_COMMAND_PREFIX/templates/$ELASTICSEARCH_MAJOR_VERSION-config.yml.sigil" SERVICE_NAME="$SERVICE_NAME" >"$SERVICE_ROOT/$PLUGIN_CONFIG_SUFFIX/elasticsearch.yml"
-    fi
   fi
 
   # shellcheck disable=SC2086
