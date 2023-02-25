@@ -212,7 +212,7 @@ DOKKU_ELASTICSEARCH_LOLLIPOP_PORT_9200_TCP_ADDR=172.17.0.1
 The following will be set on the linked application by default:
 
 ```
-ELASTICSEARCH_URL=http://lollipop:SOME_PASSWORD@dokku-elasticsearch-lollipop:9200/lollipop
+ELASTICSEARCH_URL=http://dokku-elasticsearch-lollipop:9200
 ```
 
 The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
@@ -231,13 +231,7 @@ dokku elasticsearch:link lollipop playground
 This will cause `ELASTICSEARCH_URL` to be set as:
 
 ```
-http2://lollipop:SOME_PASSWORD@dokku-elasticsearch-lollipop:9200/lollipop
-```
-
-If you specify `ELASTICSEARCH_DATABASE_SCHEME` to equal `http`, we`ll also automatically adjust `ELASTICSEARCH_URL` to match the http interface:
-
-```
-http://lollipop:SOME_PASSWORD@dokku-elasticsearch-lollipop:${PLUGIN_DATASTORE_PORTS[1]}
+http2://dokku-elasticsearch-lollipop:9200
 ```
 
 ### unlink the elasticsearch service from the app
