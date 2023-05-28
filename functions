@@ -120,6 +120,11 @@ service_create_container() {
     LINK_CONTAINER_DOCKER_ARGS+=("--network=${network}")
   fi
 
+  dokku_log_info2 "Set file permissions for config"
+  "$DOCKER_BIN" container run --rm --volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config --volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data --entrypoint "/bin/bash" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/config
+  dokku_log_info2 "Set file permissions for data"
+  "$DOCKER_BIN" container run --rm --volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config --volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data --entrypoint "/bin/bash" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/data
+
   # shellcheck disable=SC2086
   suppress_output "$DOCKER_BIN" container create "${DOCKER_ARGS[@]}" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS
 
@@ -140,10 +145,6 @@ service_create_container() {
       "$DOCKER_BIN" network connect --alias "$network_alias" "$line" "$SERVICE_NAME"
     done < <(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "post-start-network" | tr "," "\n")
   fi
-
-  retry-docker-command "$(cat "$SERVICE_ROOT/ID")" "chown -R 1000:0 /usr/share/elasticsearch/config; chown 1000:0 /usr/share/elasticsearch/data"
-
-  "$DOCKER_BIN" container restart "$(cat "$SERVICE_ROOT/ID")" >/dev/null
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
   if ! suppress_output "$DOCKER_BIN" container run "${LINK_CONTAINER_DOCKER_ARGS[@]}" "$PLUGIN_WAIT_IMAGE" -c "$network_alias:$PLUGIN_DATASTORE_WAIT_PORT" -t 60; then
