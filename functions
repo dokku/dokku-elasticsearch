@@ -121,9 +121,9 @@ service_create_container() {
   fi
 
   dokku_log_info2 "Set file permissions for config"
-  "$DOCKER_BIN" container run --rm --volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config --volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/config
+  "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/config
   dokku_log_info2 "Set file permissions for data"
-  "$DOCKER_BIN" container run --rm --volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config --volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/data
+  "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/data
 
   # shellcheck disable=SC2086
   suppress_output "$DOCKER_BIN" container create "${DOCKER_ARGS[@]}" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" $CONFIG_OPTIONS
