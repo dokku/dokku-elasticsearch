@@ -120,8 +120,16 @@ service_create_container() {
     LINK_CONTAINER_DOCKER_ARGS+=("--network=${network}")
   fi
 
-  dokku_log_info2 "Set file permissions for config"
-  "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/config
+  local ELASTICSEARCH_MAJOR_VERSION=$(echo "$PLUGIN_IMAGE_VERSION" | cut -d '.' -f 1)
+  if [[ "$ELASTICSEARCH_MAJOR_VERSION" -le "7" ]]; then
+    dokku_log_info2 "Set file permissions for config"
+    "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/config
+  else
+    dokku_log_info2 "Set file permissions"
+    "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" find /usr/share/elasticsearch -type d -exec chmod 750 \{\} \;
+    "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" find /usr/share/elasticsearch -type f -exec chmod 640 \{\} \;
+  fi
+
   dokku_log_info2 "Set file permissions for data"
   "$DOCKER_BIN" container run --rm "--volume=$SERVICE_HOST_ROOT/$PLUGIN_CONFIG_SUFFIX:/usr/share/elasticsearch/config" "--volume=$SERVICE_HOST_ROOT/data:/usr/share/elasticsearch/data" --entrypoint "" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" chown -R 1000:0 /usr/share/elasticsearch/data
 
