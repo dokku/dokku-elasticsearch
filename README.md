@@ -81,7 +81,7 @@ export ELASTICSEARCH_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku elasticsearch:create lollipop
 ```
 
-You can also specify custom environment variables to start the elasticsearch service in semi-colon separated form.
+You can also specify custom environment variables to start the elasticsearch service in semicolon-separated form.
 
 ```shell
 export ELASTICSEARCH_CUSTOM_ENV="USER=alpha;HOST=beta"
