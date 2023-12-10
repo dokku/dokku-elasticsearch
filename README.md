@@ -73,7 +73,7 @@ Create a elasticsearch service named lollipop:
 dokku elasticsearch:create lollipop
 ```
 
-You can also specify the image and image version to use for the service. It _must_ be compatible with the elasticsearch image.
+You can also specify the image and image version to use for the service. It *must* be compatible with the elasticsearch image.
 
 ```shell
 export ELASTICSEARCH_IMAGE="elasticsearch"
