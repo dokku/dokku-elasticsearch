@@ -11,7 +11,7 @@ Official elasticsearch plugin for dokku. Currently defaults to installing [elast
 
 ```shell
 # on 0.19.x+
-sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git elasticsearch
+sudo dokku plugin:install https://github.com/dokku/dokku-elasticsearch.git --name elasticsearch
 ```
 
 ## Commands
