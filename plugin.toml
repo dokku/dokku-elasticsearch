@@ -1,4 +1,4 @@
 [plugin]
 description = "dokku elasticsearch service plugin"
-version = "1.38.5"
+version = "1.38.6"
 [plugin.config]
