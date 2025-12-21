@@ -1,6 +1,6 @@
 # dokku elasticsearch [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-elasticsearch/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-elasticsearch/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 9.2.2](https://hub.docker.com/_/elasticsearch/).
+Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 9.2.3](https://hub.docker.com/_/elasticsearch/).
 
 ## Requirements
 
