@@ -1,0 +1,98 @@
+---
+services:
+  elasticsearch:
+    image: "{{ .Image }}:{{ .ImageVersion }}"
+
+    volumes:
+      # this mounts over the directory the image keeps its own configuration
+      # in, which is why the pre create hook copies that configuration out
+      # first
+      - type: bind
+        source: "{{ .HostRoot }}/config"
+        target: /usr/share/elasticsearch/config
+      - type: bind
+        source: "{{ .HostRoot }}/data"
+        target: /usr/share/elasticsearch/data
+
+    configs:
+      - source: elasticsearch_yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+
+    ports:
+      - name: native
+        target: 9200
+        primary: true
+      - name: transport
+        target: 9300
+
+configs:
+  # seeded before the image's own configuration is copied out, so this is the
+  # elasticsearch.yml the service runs with and the rest of the directory is
+  # whatever the image ships
+  elasticsearch_yml:
+    content: |
+      node.name: {{ .ContainerName }}-1
+      node.master: true
+      cluster.name: {{ .ContainerName }}-cluster
+      network.host: 0.0.0.0
+      cluster.initial_master_nodes:
+        - {{ .ContainerName }}-1
+
+x-dokku:
+  plugin: elasticsearch
+  title: Elasticsearch
+
+  # http rather than elasticsearch: a linked app talks to it over http, which
+  # is the scheme the bash plugin has always handed over
+  scheme: http
+  alias: ELASTICSEARCH
+
+  # no credentials: the bash plugin starts elasticsearch with security off and
+  # hands over an address with nothing to authenticate with
+  dsn: "{{ .Scheme }}://{{ .Host }}:{{ .Port.native }}"
+
+  # elasticsearch maps its indices into memory and will not start on a host
+  # whose limit is the usual default, so the host is asked before anything is
+  # made rather than after the container has failed
+  requirements:
+    - sysctl: vm.max_map_count
+      minimum: 262144
+      message: >-
+        vm.max_map_count is too low for Elasticsearch. Raise it with:
+        echo 'vm.max_map_count=262144' | sudo tee -a /etc/sysctl.conf; sudo sysctl -p
+
+  wait: native
+
+  # elasticsearch takes longer to answer than the probe's own default allows,
+  # which is why the bash plugin waits a minute for it
+  wait_timeout: 60
+
+  hooks:
+    pre_create:
+      # the image's own configuration, copied out before the mount hides it,
+      # and the files handed to the user the image runs as. It runs as root
+      # with the image's entrypoint cleared, since the entrypoint would start
+      # elasticsearch rather than run this.
+      user: "0"
+      entrypoint: ""
+      volumes:
+        - type: bind
+          source: "{{ .HostRoot }}/config"
+          target: /seed
+        - type: bind
+          source: "{{ .HostRoot }}/data"
+          target: /seed-data
+      exec:
+        - sh
+        - -c
+        # -n so that nothing already there is replaced, which is what leaves
+        # the seeded elasticsearch.yml and an operator's edits alone. The heap
+        # is halved from the image's default, as the bash plugin does, because
+        # a gigabyte is more than a service of this size needs.
+        - >-
+          cp -Rn /usr/share/elasticsearch/config/. /seed/ 2>/dev/null || true;
+          sed -i 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' /seed/jvm.options 2>/dev/null || true;
+          chown -R 1000:0 /seed /seed-data
+
+  # no commands: the bash plugin implements none of connect, export or import,
+  # so clone and the backup family are unavailable too

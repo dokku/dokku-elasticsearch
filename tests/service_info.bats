@@ -6,7 +6,7 @@ setup() {
 }
 
 teardown() {
-  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l
+  dokku "$PLUGIN_COMMAND_PREFIX:destroy" l -f
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:info) error when there are no arguments" {
@@ -28,7 +28,7 @@ teardown() {
   dokku "$PLUGIN_COMMAND_PREFIX:create" test_with_underscores
   run dokku "$PLUGIN_COMMAND_PREFIX:info" test_with_underscores
   assert_contains "${lines[*]}" "http://dokku-elasticsearch-test-with-underscores:9200"
-  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" test_with_underscores
+  dokku "$PLUGIN_COMMAND_PREFIX:destroy" test_with_underscores -f
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:info) success with flag" {
