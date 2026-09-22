@@ -1,6 +1,6 @@
 # dokku elasticsearch [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-elasticsearch/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-elasticsearch/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 9.5.2](https://hub.docker.com/_/elasticsearch/).
+Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 9.5.3](https://hub.docker.com/_/elasticsearch/).
 
 ## Requirements
 
@@ -77,7 +77,7 @@ You can also specify the image and image version to use for the service. It *mus
 
 ```shell
 export ELASTICSEARCH_IMAGE="elasticsearch"
-export ELASTICSEARCH_IMAGE_VERSION="9.5.2"
+export ELASTICSEARCH_IMAGE_VERSION="9.5.3"
 dokku elasticsearch:create lollipop
 ```
 
