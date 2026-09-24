@@ -3,6 +3,14 @@ services:
   elasticsearch:
     image: "{{ .Image }}:{{ .ImageVersion }}"
 
+    environment:
+      # with a memory limit, elasticsearch sizes its heap from it. With none it
+      # would take half the host, so the heap is held to the 512m the bash
+      # plugin meant to give it. An unset limit reaches a template as nothing,
+      # and a value that renders to nothing is left out, which keeps a custom
+      # ES_JAVA_OPTS from being cleared on a service that has a limit.
+      ES_JAVA_OPTS: "{{ if not .Memory }}-Xms512m -Xmx512m{{ end }}"
+
     volumes:
       # this mounts over the directory the image keeps its own configuration
       # in, which is why the pre create hook copies that configuration out
@@ -87,11 +95,10 @@ x-dokku:
         - -c
         # -n so that nothing already there is replaced, which is what leaves
         # the seeded elasticsearch.yml and an operator's edits alone. The heap
-        # is halved from the image's default, as the bash plugin does, because
-        # a gigabyte is more than a service of this size needs.
+        # is not set here: jvm.options has not named one since 7.11, and the
+        # environment above decides it on every start instead.
         - >-
           cp -Rn /usr/share/elasticsearch/config/. /seed/ 2>/dev/null || true;
-          sed -i 's#Xms1g#Xms512m#g; s#Xmx1g#Xmx512m#g' /seed/jvm.options 2>/dev/null || true;
           chown -R 1000:0 /seed /seed-data
 
   # no commands: the bash plugin implements none of connect, export or import,
