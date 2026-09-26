@@ -481,7 +481,7 @@ The lifecycle of each service can be managed through the following commands:
 dokku elasticsearch:enter <service>
 ```
 
-A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
+A shell can be opened against a running service. Filesystem changes will not be saved to disk.
 
 > NOTE: disconnecting from ssh while running this command may leave zombie processes due to moby/moby#9098
 
