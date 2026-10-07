@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+"""Deletes every data stream and index an app could have written to.
+
+Names starting with a dot are left alone: they are the ones elasticsearch keeps
+for itself, such as .security, .tasks and .geoip_databases, which are hidden or
+system indices rather than an app's data. Templates, ingest pipelines and
+lifecycle policies are configuration rather than data, and are kept.
+
+Every name is given explicitly, since action.destructive_requires_name refuses
+a wildcard delete from 8.0 on. Data streams go first, as the indices backing
+one cannot be deleted while it exists.
+
+Shared by elasticsearch-7, -8 and -9, whose index api is the same.
+"""
+import json
+import os
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+HOST = os.environ.get("ELASTICSEARCH_HOST", "127.0.0.1")
+PORT = os.environ.get("ELASTICSEARCH_PORT", "9200")
+
+# a request line holds every name being deleted, and elasticsearch refuses one
+# longer than 4kb, so the names are sent a batch at a time
+BATCH_LENGTH = 3000
+
+
+def request(path, method="GET"):
+    url = "http://{}:{}/{}".format(HOST, PORT, path)
+    message = urllib.request.Request(url, method=method)
+
+    with urllib.request.urlopen(message) as response:
+        return json.load(response)
+
+
+def batches(names):
+    batch = []
+    length = 0
+    for name in names:
+        quoted = urllib.parse.quote(name, safe="")
+        if batch and length + len(quoted) + 1 > BATCH_LENGTH:
+            yield ",".join(batch)
+            batch = []
+            length = 0
+        batch.append(quoted)
+        length += len(quoted) + 1
+
+    if batch:
+        yield ",".join(batch)
+
+
+def delete(kind, names):
+    for batch in batches(names):
+        try:
+            request("{}{}".format(kind, batch), method="DELETE")
+        except urllib.error.HTTPError as error:
+            sys.stderr.write("unable to remove {}: {}\n".format(batch, error.read().decode()))
+            return False
+
+    return True
+
+
+def main():
+    # the port answers before the cluster does, and a request made then is
+    # refused
+    request("_cluster/health?wait_for_status=yellow&timeout=60s")
+
+    streams = request("_data_stream?expand_wildcards=all").get("data_streams", [])
+    names = sorted(stream["name"] for stream in streams if not stream["name"].startswith("."))
+    if not delete("_data_stream/", names):
+        return 1
+
+    indices = request("_cat/indices?format=json&h=index&expand_wildcards=all")
+    names = sorted(index["index"] for index in indices if not index["index"].startswith("."))
+    if not delete("", names):
+        return 1
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

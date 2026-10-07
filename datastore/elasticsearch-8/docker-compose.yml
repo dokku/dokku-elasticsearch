@@ -101,5 +101,14 @@ x-dokku:
           cp -Rn /usr/share/elasticsearch/config/. /seed/ 2>/dev/null || true;
           chown -R 1000:0 /seed /seed-data
 
-  # no commands: the bash plugin implements none of connect, export or import,
-  # so clone and the backup family are unavailable too
+  # no connect, export or import: the bash plugin implements none of them, so
+  # clone and the backup family are unavailable too
+  commands:
+    # beside the service, in an image dokku already ships that has python, since
+    # the elasticsearch image is not one to rely on for a client of its own.
+    # The script is mounted into the sidecar, so a service whose container was
+    # created before the script existed can still be reset.
+    reset:
+      mode: sidecar
+      image: dokku/s3backup:0.20.0
+      exec: ["dokku-elasticsearch-reset"]
