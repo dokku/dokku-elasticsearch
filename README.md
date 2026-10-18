@@ -219,11 +219,13 @@ flags:
 - `--log-opt`: show the docker log options the service container is run with
 - `--memory`: show the memory limit the service container is run with
 - `--mounts`: show the host paths and docker volumes mounted into the service container
+- `--password-fingerprint`: show a sha256 fingerprint of the service password
 - `--port-bind-address`: show the address exposed ports without one of their own are bound on
 - `--port-source-range`: show the only range of client addresses the exposed ports accept
 - `--post-create-network`: show the networks to attach to after service container creation
 - `--post-start-network`: show the networks to attach to after service container start
 - `--restart-policy`: show the restart policy the service container is run with
+- `--root-password-fingerprint`: show a sha256 fingerprint of the service root password
 - `--service`: show the name of the service
 - `--service-root`: show the service root directory
 - `--shm-size`: show the shared memory size the service container is run with
@@ -294,6 +296,7 @@ printf '%s' "$AWS_ACCESS_KEY_ID" | sha256sum
 printf '%s' "$AWS_SECRET_ACCESS_KEY" | sha256sum
 printf '%s\n%s' "$AWS_ACCESS_KEY_ID" "$AWS_SECRET_ACCESS_KEY" | sha256sum
 printf '%s' "$PASSPHRASE" | sha256sum
+printf '%s' "$PASSWORD" | sha256sum
 ```
 
 ### list all Elasticsearch services
@@ -459,6 +462,11 @@ An app is still linked after its `ELASTICSEARCH_URL` is changed to point elsewhe
 # usage
 dokku elasticsearch:set <service> <key> <value>
 ```
+
+flags:
+
+- `--allow-restart`: restart or reexpose the service when the property only takes effect that way and its value changed
+- `--no-restart`: do not restart the linked apps when a password change updates the url they hold
 
 Set the network to attach after the service container is started:
 
@@ -1048,7 +1056,7 @@ dokku elasticsearch:reset lollipop --force
 
 ### Service properties
 
-Every setting a service has after it is created, other than its image, its passwords, its mounts and its backup schedule, each of which has a command of its own, is changed with `dokku elasticsearch:set lollipop <key> <value>`, and cleared by giving no value. `dokku elasticsearch:info lollipop` reports each of them, with a credential reported as a fingerprint rather than its value. A setting the container is made with only reaches it once the container is built again, and `set` warns when that is the case: `dokku elasticsearch:restart` keeps the container the service has, so use `dokku elasticsearch:stop` and then `dokku elasticsearch:start`.
+Every setting a service has after it is created, other than its image, its mounts and its backup schedule, each of which has a command of its own, is changed with `dokku elasticsearch:set lollipop <key> <value>`, and cleared by giving no value. `dokku elasticsearch:info lollipop` reports each of them, with a credential reported as a fingerprint rather than its value. A setting the container is made with only reaches it once the container is built again, and `set` warns when that is the case: `dokku elasticsearch:restart` keeps the container the service has, so use `dokku elasticsearch:stop` and then `dokku elasticsearch:start`. Passing `--allow-restart` to `set` does that, or the `reexpose` an expose setting takes, whenever the value changed, and leaves the service alone when it did not.
 
 | Property | Description | Takes effect |
 | --- | --- | --- |
