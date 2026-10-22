@@ -1,6 +1,6 @@
 # dokku elasticsearch [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-elasticsearch/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-elasticsearch/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 9.5.3](https://hub.docker.com/_/elasticsearch/).
+Official elasticsearch plugin for dokku. Currently defaults to installing [elasticsearch 9.5.5](https://hub.docker.com/_/elasticsearch/).
 
 ## Requirements
 
@@ -35,7 +35,7 @@ elasticsearch:promote <service> [<app>]            # promote service <service> a
 elasticsearch:reexpose <service>                   # reexpose a Elasticsearch service, applying its expose settings
 elasticsearch:reset <service> [-f|--force]         # delete all data in the Elasticsearch service, keeping the service and its links
 elasticsearch:restart <service>                    # graceful shutdown and restart of the Elasticsearch service container
-elasticsearch:set <service> <key> <value>          # set or clear a property for a service
+elasticsearch:set <service> <key> [<value>] [--id <id>] # set or clear a property for a service
 elasticsearch:start <service>                      # start a previously stopped Elasticsearch service
 elasticsearch:stop <service>                       # stop a running Elasticsearch service
 elasticsearch:unexpose <service>                   # unexpose a previously exposed Elasticsearch service
@@ -88,7 +88,7 @@ You can also specify the image and image version to use for the service. It *mus
 
 ```shell
 export ELASTICSEARCH_IMAGE="elasticsearch"
-export ELASTICSEARCH_IMAGE_VERSION="9.5.3"
+export ELASTICSEARCH_IMAGE_VERSION="9.5.5"
 dokku elasticsearch:create lollipop
 ```
 
@@ -191,6 +191,7 @@ flags:
 - `--backup-object-name`: show the name backups are uploaded under in place of the default
 - `--backup-public-key-id`: show the gpg public key id backups are encrypted with
 - `--backup-schedule`: show the cron schedule backups run on
+- `--backup-schedules`: show every scheduled backup, as id, schedule, bucket and use-iam
 - `--backup-secret-access-key-fingerprint`: show a sha256 fingerprint of the stored backup secret access key
 - `--backup-signature-version`: show the signature version backups authenticate with
 - `--backup-storage-class`: show the s3 storage class backups are uploaded with
@@ -460,12 +461,13 @@ An app is still linked after its `ELASTICSEARCH_URL` is changed to point elsewhe
 
 ```shell
 # usage
-dokku elasticsearch:set <service> <key> <value>
+dokku elasticsearch:set <service> <key> [<value>] [--id <id>]
 ```
 
 flags:
 
 - `--allow-restart`: restart or reexpose the service when the property only takes effect that way and its value changed
+- `--id <string>`: record the property on this backup schedule instead of on the service
 - `--no-restart`: do not restart the linked apps when a password change updates the url they hold
 
 Set the network to attach after the service container is started:
