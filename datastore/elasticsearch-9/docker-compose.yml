@@ -4,12 +4,13 @@ services:
     image: "{{ .Image }}:{{ .ImageVersion }}"
 
     environment:
-      # with a memory limit, elasticsearch sizes its heap from it. With none it
-      # would take half the host, so the heap is held to the 512m the bash
-      # plugin meant to give it. An unset limit reaches a template as nothing,
-      # and a value that renders to nothing is left out, which keeps a custom
-      # ES_JAVA_OPTS from being cleared on a service that has a limit.
-      ES_JAVA_OPTS: "{{ if not .Memory }}-Xms512m -Xmx512m{{ end }}"
+      # the heap is the service memory when the service has one. Otherwise,
+      # with a memory limit, elasticsearch sizes its heap from it, and with
+      # none it would take half the host, so the heap is held to the 512m the
+      # bash plugin meant to give it. An unset limit reaches a template as
+      # nothing, and a value that renders to nothing is left out, which keeps
+      # a custom ES_JAVA_OPTS from being cleared on a service that has a limit.
+      ES_JAVA_OPTS: "{{ if .ServiceMemory }}-Xms{{ .ServiceMemory }}m -Xmx{{ .ServiceMemory }}m{{ else if not .Memory }}-Xms512m -Xmx512m{{ end }}"
 
     volumes:
       # this mounts over the directory the image keeps its own configuration
@@ -74,6 +75,11 @@ x-dokku:
   # elasticsearch takes longer to answer than the probe's own default allows,
   # which is why the bash plugin waits a minute for it
   wait_timeout: 60
+
+  # the heap is fixed when the jvm starts, so there is no change to declare and
+  # a new size waits for the container to be made again. There is no default
+  # either, which leaves the heap to the memory limit as before
+  service_memory: {}
 
   hooks:
     pre_create:
