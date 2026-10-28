@@ -73,6 +73,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-r|--root-password <string>`: override the root-level service password, for datastores that have one
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap, for datastores that support it (default: the datastore's own)
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -128,6 +129,12 @@ The service is waited on until it answers, for as long as the datastore's own de
 
 ```shell
 dokku elasticsearch:create lollipop --wait-timeout 120
+```
+
+The memory the datastore itself is told to use, in megabytes, is left to the datastore unless it is given, and is kept apart from the container's memory limit.
+
+```shell
+dokku elasticsearch:create lollipop --service-memory 256
 ```
 
 The config options are handed to the process the container runs, not to docker, so a host path or docker volume is mounted with --volume, which may be repeated.
@@ -228,6 +235,7 @@ flags:
 - `--restart-policy`: show the restart policy the service container is run with
 - `--root-password-fingerprint`: show a sha256 fingerprint of the service root password
 - `--service`: show the name of the service
+- `--service-memory`: show the memory in megabytes the datastore itself is told to use
 - `--service-root`: show the service root directory
 - `--shm-size`: show the shared memory size the service container is run with
 - `--status`: show the service running status
@@ -494,6 +502,12 @@ Limit the container to 512 megabytes of memory, or go back to no limit with 0:
 dokku elasticsearch:set lollipop memory 512
 ```
 
+Tell the datastore itself to use 256 megabytes, or go back to its own default by giving no value:
+
+```shell
+dokku elasticsearch:set lollipop service-memory 256
+```
+
 Give the container a shared memory size of its own:
 
 ```shell
@@ -614,7 +628,7 @@ Go back to mounting every volume where the definition does:
 dokku elasticsearch:set lollipop volume-targets
 ```
 
-> NOTE: a network, a log setting, a restart policy, a volume target, the config options, the custom environment, the memory limit or the shared memory size reaches the container the next time one is built, and set warns that it does. elasticsearch:restart keeps the container it has, so use elasticsearch:stop and then elasticsearch:start on a service that is already running.
+> NOTE: a network, a log setting, a restart policy, a volume target, the config options, the custom environment, the memory limit, the service memory or the shared memory size reaches the container the next time one is built, and set warns that it does. elasticsearch:restart keeps the container it has, so use elasticsearch:stop and then elasticsearch:start on a service that is already running.
 > NOTE: a port-bind-address or port-source-range reaches an exposed service with elasticsearch:reexpose, which replaces the container publishing its ports and leaves the service container running.
 > NOTE: an expose-mode, or a port-bind-address for a service exposed directly, reaches an exposed service with elasticsearch:reexpose, which stops and starts a running service after asking. It also reaches the service the next time it is restarted, or stopped and started.
 
@@ -930,6 +944,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade, required for one that migrates the data
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap, empty for the datastore's own
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -969,6 +984,12 @@ A service keeps its memory limit unless --memory is passed, and --memory 0 remov
 
 ```shell
 dokku elasticsearch:upgrade lollipop --memory 512
+```
+
+A service keeps its service memory unless --service-memory is passed, and --service-memory "" leaves it to the datastore.
+
+```shell
+dokku elasticsearch:upgrade lollipop --service-memory 256
 ```
 
 ### Service Automation
@@ -1077,6 +1098,7 @@ Every setting a service has after it is created, other than its image, its mount
 | `config-options` | extra arguments for the process the service container runs | after `elasticsearch:stop` and `elasticsearch:start` |
 | `custom-env` | semicolon-delimited environment variables the container is run with | after `elasticsearch:stop` and `elasticsearch:start` |
 | `memory` | the container memory limit in megabytes, `0` for no limit | after `elasticsearch:stop` and `elasticsearch:start` |
+| `service-memory` | the memory in megabytes the datastore itself is told to use, such as a cache size or a heap, empty for its own default | after `elasticsearch:stop` and `elasticsearch:start` |
 | `shm-size` | the shared memory size of the container, such as `64m` | after `elasticsearch:stop` and `elasticsearch:start` |
 
 ### Limiting where and to whom a service is exposed
@@ -1102,6 +1124,12 @@ A `port-source-range` cannot be enforced on a port the service container publish
 A service is waited on until it answers on its port after it is created, cloned, started, restarted, upgraded or exposed. If it takes longer than that to start - on a slow host, or with an image that does more on its first boot - the command fails with `ERROR: unable to connect`.
 
 To wait longer for every elasticsearch service on the host, set the `ELASTICSEARCH_WAIT_TIMEOUT` environment variable to a number of seconds. To wait longer for a single service, set its `wait-timeout` property with `dokku elasticsearch:set` or pass `--wait-timeout` to `create`, `clone` or `upgrade`. The service's own setting is used first, then the environment variable, then the datastore's default.
+
+### Datastore memory
+
+The memory Elasticsearch itself is told to use, in megabytes, is the service's `service-memory`. It is set with `--service-memory` when a service is created or upgraded, changed with `dokku elasticsearch:set lollipop service-memory <megabytes>`, cleared by giving no value, and reported by `dokku elasticsearch:info lollipop --service-memory`. A service is created without one unless `--service-memory` is passed, which leaves the size to Elasticsearch. A change reaches the container the next time one is built, so use `dokku elasticsearch:stop` and then `dokku elasticsearch:start`, or pass `--allow-restart` to `set`.
+
+It is separate from the container's `memory` limit, which is unlimited unless it is set. When both are set, keep the service memory below the limit, since a datastore that grows past the limit has its container killed.
 
 ### Moving where a service's volumes are mounted
 
